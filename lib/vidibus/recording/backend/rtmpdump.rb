@@ -5,6 +5,14 @@ module Vidibus::Recording::Backend
 
     attr_accessor :stream, :file, :live, :metadata
 
+    # Sets up a new dumper.
+    #
+    # Required attributes:
+    #   :stream, :file
+    #
+    # Optional:
+    #   :live
+    #
     def initialize(attributes)
       self.stream = attributes[:stream] or raise ConfigurationError.new("No input stream given")
       self.file = attributes[:file] or raise ConfigurationError.new("No output file defined")
