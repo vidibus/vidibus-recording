@@ -151,7 +151,7 @@ module Vidibus::Recording
       if str = read_file(log_file)
         str.gsub!(/\A[^\n]+\n/, "") # remove first line
         unless str == ""
-          self.log = str
+          self.log = str.gsub(/\r\n?/, "\n")
         end
       end
     end
