@@ -62,9 +62,10 @@ module Vidibus::Recording::Backend
     #   audiocodecid          .mp3
     #   audiodatarate         48.00
     #
-    def extract_metadata(std)
-      if metadata = std.match(/Metadata\:\n\s+(.+)\Z/m)
-        tuples = $1.scan(/([^\n\ \d]+)\ +([^\ ][^\n]+)\n/mi)
+    def extract_metadata(string)
+      prefix = /(?:INFO\:\ *)/ if string.match(/INFO\:/) # INFO: gets prepended since v2.3
+      if metadata = string.match(/#{prefix}Metadata\:\n(.+)\Z/m)
+        tuples = $1.scan(/#{prefix}([^\n\ \d]+)\ +([^\ \n][^\n]+)\n/)
         self.metadata = Hash[tuples]
       end
     end
