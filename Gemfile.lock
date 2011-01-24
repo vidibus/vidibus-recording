@@ -1,7 +1,8 @@
 PATH
   remote: .
   specs:
-    vidibus-recording (0.0.2)
+    vidibus-recording (0.0.3)
+      activesupport (~> 3.0.0)
       delayed_job_mongoid
       mongoid (~> 2.0.0.beta.20)
       vidibus-uuid
@@ -58,6 +59,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  activesupport (~> 3.0.0)
   bundler (>= 1.0.0)
   delayed_job_mongoid
   mongoid (~> 2.0.0.beta.20)

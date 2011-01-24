@@ -13,10 +13,10 @@ Gem::Specification.new do |s|
   s.description       = "Allows recording of RTMP video streams. Uses RTMPdump."
 
   s.required_rubygems_version = ">= 1.3.6"
-
+  
+  s.add_dependency "activesupport", "~> 3.0.0"
   s.add_dependency "mongoid", "~> 2.0.0.beta.20"
   s.add_dependency "delayed_job_mongoid"
-
   s.add_dependency "vidibus-uuid"
 
   s.add_development_dependency "bundler", ">= 1.0.0"
