@@ -1,6 +1,5 @@
-require "open4"
+require "open3"
 require "yaml"
-require "robustthread"
 require "delayed_job_mongoid"
 require "active_support/core_ext"
 require "vidibus-uuid"

@@ -1,7 +1,5 @@
 module Vidibus::Recording
   class Job
-    include Open4
-
     class ProcessError < StandardError; end
 
     attr_accessor :recording, :pid
@@ -12,7 +10,6 @@ module Vidibus::Recording
     end
 
     def start
-      start_logger
       self.pid = fork do
         start_thread
       end
@@ -48,56 +45,44 @@ module Vidibus::Recording
     protected
 
     def start_thread
-      stdin = ""
-      stdout = ""
-      stderr = ""
-      last_stderr = ""
-      last_stdout = ""
-      task = background(recording.backend.command, 0=>stdin, 1=>stdout, 2=>stderr)
-
-      waiter = Thread.new {y(task.pid => task.exitstatus)} # t.exitstatus is a blocking call!
       timeout = 5
+      metadata = nil
 
-      while(status = task.status)
-        unless stderr == last_stderr
-          metadata = extract_metadata(stderr)
-          last_stderr = stderr
-        end
-
-        unless stdout == last_stdout
-          metadata = extract_metadata(stdout)
-          last_stdout = stdout
-        end
-
-        unless metadata
-          timeout -= 1
-          if timeout == 0
-            recording.fail("No Metadata has been received. This stream does not work.")
-            return
+      Open3::popen3(recording.backend.command) do |stdin, stdout, stderr, waiter|
+        loop do
+          size = stderr.stat.blocks * stderr.stat.blksize
+          if size > 0
+            std = stderr.readpartial(size) rescue ""
+            log(std)
+            metadata = extract_metadata(std) unless metadata
           end
+          unless metadata
+            timeout -= 1
+            if timeout == 0
+              recording.fail("No Metadata has been received. This stream does not work.")
+              return
+            end
+          end
+          sleep 2
         end
-
-        sleep 2
       end
-
       waiter.join
+    end
+
+    def log(msg)
+      File.open(recording.log_file, "a") do |f|
+        f.write(msg)
+      end
     end
 
     def extract_metadata(std)
       metadata = recording.backend.extract_metadata(std)
       if metadata
-        File.open(recording.yml_file, "w") do |file|
-          file.write(metadata.to_yaml)
+        File.open(recording.yml_file, "w") do |f|
+          f.write(metadata.to_yaml)
         end
       end
       metadata
-    end
-
-    def start_logger
-      RobustThread.logger = Logger.new(recording.log_file)
-      RobustThread.exception_handler do |exception|
-        RobustThread.log exception
-      end
     end
   end
 end
