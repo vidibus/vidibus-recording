@@ -2,16 +2,17 @@ module Vidibus::Recording
   class Job
     class ProcessError < StandardError; end
 
-    attr_accessor :recording, :pid
+    attr_accessor :recording, :pid, :metadata
 
     def initialize(recording)
       self.recording = recording
       self.pid = recording.pid
+      self.metadata = nil
     end
 
     def start
       self.pid = fork do
-        start_thread
+        record!
       end
       Process.detach(pid)
       pid
@@ -44,21 +45,21 @@ module Vidibus::Recording
 
     protected
 
-    def start_thread
-      timeout = 5
-      metadata = nil
-
-      Open3::popen3(recording.backend.command) do |stdin, stdout, stderr, waiter|
+    def record!
+      Open3::popen3(recording.backend.command) do |stdin, stdout, stderr, process|
+        maxloops = 5
         loop do
-          size = stderr.stat.blocks * stderr.stat.blksize
-          if size > 0
-            std = stderr.readpartial(size) rescue ""
-            log(std)
-            metadata = extract_metadata(std) unless metadata
+          begin
+            string = stdout.read_nonblock(1024)
+            log(string)
+            extract_metadata(string) unless metadata
+          rescue Errno::EAGAIN
+          rescue EOFError
           end
+
           unless metadata
-            timeout -= 1
-            if timeout == 0
+            maxloops -= 1
+            if maxloops == 0
               recording.fail("No Metadata has been received. This stream does not work.")
               return
             end
@@ -66,7 +67,7 @@ module Vidibus::Recording
           sleep 2
         end
       end
-      waiter.join
+      process.join
     end
 
     def log(msg)
@@ -75,8 +76,8 @@ module Vidibus::Recording
       end
     end
 
-    def extract_metadata(std)
-      metadata = recording.backend.extract_metadata(std)
+    def extract_metadata(string)
+      self.metadata = recording.backend.extract_metadata(string)
       if metadata
         File.open(recording.yml_file, "w") do |f|
           f.write(metadata.to_yaml)
