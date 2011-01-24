@@ -12,15 +12,13 @@ module Vidibus::Recording::Backend
     end
 
     # Command for starting the recording.
-    # Required options:
-    #   :stream, :file
-    # Optional:
-    #   :live
-    #
-    def command(options = {})
-      c = %(rtmpdump -r "#{stream}" -o #{file})
-      c << " --live" if live
-      c
+    def command
+      args = [].tap do |a|
+        a << "-r #{stream}"
+        a << "-o #{file}"
+        a << "--live" if live
+      end
+      %(rtmpdump #{args.join(" ")} 2>&1)
     end
 
     # Extract metadata from stdout or stderr.
