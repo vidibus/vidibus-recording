@@ -58,7 +58,7 @@ module Vidibus::Recording::Backend
     #
     def extract_metadata(std)
       if metadata = std.match(/Metadata\:\n\s+(.+)\Z/m)
-        tuples = $1.scan(/([^\n\s\d]+)\s*([^\n]+)\n/m)
+        tuples = $1.scan(/([^\n\ \d]+)\ +([^\ ][^\n]+)\n/mi)
         self.metadata = Hash[tuples]
       end
     end
