@@ -1,0 +1,30 @@
+RTMPDump v2.3
+(c) 2010 Andrej Stepanchuk, Howard Chu, The Flvstreamer Team; license: GPL
+Connecting ...
+INFO: Connected...
+ERROR: rtmp server sent error
+Starting Live Stream
+INFO: Metadata:
+INFO:   author                
+INFO:   copyright             
+INFO:   description           
+INFO:   keywords              
+INFO:   rating                
+INFO:   title                 
+INFO:   presetname            Custom
+INFO:   creationdate          Mon Jan 17 15:22:50 2011
+INFO:   videodevice           Osprey-210 Video Device 1
+INFO:   framerate             25.00
+INFO:   width                 680.00
+INFO:   height                394.00
+INFO:   videocodecid          avc1
+INFO:   videodatarate         650.00
+INFO:   avclevel              31.00
+INFO:   avcprofile            66.00
+INFO:   videokeyframe_frequency5.00
+INFO:   audiodevice           Osprey-210 Audio Device 1
+INFO:   audiosamplerate       22050.00
+INFO:   audiochannels         1.00
+INFO:   audioinputvolume      75.00
+INFO:   audiocodecid          .mp3
+INFO:   audiodatarate         48.00
