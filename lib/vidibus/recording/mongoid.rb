@@ -6,7 +6,7 @@ module Vidibus::Recording
     class StreamError < StandardError; end
 
     included do
-      include Mongoid::Timestamps
+      include ::Mongoid::Timestamps
       include Vidibus::Recording::Helpers
       include Vidibus::Uuid::Mongoid
 
