@@ -16,7 +16,6 @@ module Vidibus::Recording
       field :info, :type => Hash
       field :size, :type => Integer
       field :duration, :type => Integer
-      field :log
       field :error
       field :scheduled_at, :type => DateTime
       field :started_at, :type => DateTime
@@ -140,19 +139,10 @@ module Vidibus::Recording
     end
 
     def postprocess
-      process_log_file
       process_yml_file
       set_size
       set_duration
       save!
-    end
-
-    def process_log_file
-      if str = read_file(log_file)
-        unless str == ""
-          self.log = str.gsub(/\r\n?/, "\n")
-        end
-      end
     end
 
     def process_yml_file
