@@ -1,3 +1,5 @@
+# TODO: extend from Vidibus::Loop
+
 module Vidibus::Recording
   class Job
     class ProcessError < StandardError; end
