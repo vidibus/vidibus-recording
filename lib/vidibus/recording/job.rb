@@ -49,7 +49,7 @@ module Vidibus::Recording
 
     def record!
       Open3::popen3(recording.backend.command) do |stdin, stdout, stderr, process|
-        maxloops = 5
+        maxloops = 10
         loop do
           begin
             string = stdout.read_nonblock(1024)
