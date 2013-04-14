@@ -3,8 +3,8 @@ module Vidibus::Recording
     class ConfigurationError < StandardError; end
     class ProtocolError < ConfigurationError; end
 
-    BACKENDS = %[rtmpdump]
-    
+    BACKENDS = %w[rtmpdump]
+
     # Returns an instance of a backend processor
     # that is able to record the given stream.
     def self.load(attributes)
