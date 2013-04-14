@@ -3,3 +3,4 @@ pkg/*
 .bundle
 cli
 recordings
+coverage
