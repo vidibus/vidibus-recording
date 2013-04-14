@@ -1,8 +1,8 @@
-require "open3"
-require "yaml"
-require "delayed_job_mongoid"
-require "active_support/core_ext"
-require "vidibus-uuid"
+require 'open3'
+require 'yaml'
+require 'delayed_job_mongoid'
+require 'active_support/core_ext'
+require 'vidibus-uuid'
 
 module Vidibus
   module Recording
@@ -12,5 +12,4 @@ module Vidibus
   end
 end
 
-$:.unshift(File.join(File.dirname(__FILE__), "vidibus"))
-require "recording"
+require 'vidibus/recording'
