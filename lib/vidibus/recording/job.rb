@@ -62,7 +62,7 @@ module Vidibus::Recording
           unless metadata
             maxloops -= 1
             if maxloops == 0
-              recording.fail("No Metadata has been received. This stream does not work.")
+              fail('No Metadata has been received. This stream does not work.')
               return
             end
           end
@@ -76,6 +76,11 @@ module Vidibus::Recording
       File.open(recording.log_file, "a") do |f|
         f.write(msg)
       end
+    end
+
+    def fail(msg)
+      log("\n\n---------\nError:\n#{msg}")
+      recording.fail(msg)
     end
 
     def extract_metadata(string)
