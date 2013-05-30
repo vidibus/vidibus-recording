@@ -13,7 +13,7 @@ module Vidibus::Recording
       raise ProtocolError.new(%(No protocol could be derived stream "#{stream}")) if protocol == ""
 
       for backend in BACKENDS
-        require "recording/backend/#{backend}"
+        require "vidibus/recording/backend/#{backend}"
         backend_class = "Vidibus::Recording::Backend::#{backend.classify}".constantize
         if backend_class::PROTOCOLS.include?(protocol)
           return backend_class.new(attributes)
