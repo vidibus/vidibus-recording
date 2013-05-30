@@ -14,7 +14,12 @@ module Vidibus::Recording
 
     def start
       self.pid = fork do
-        record!
+        begin
+          record!
+        rescue => e
+          fail(e.inspect)
+          return
+        end
       end
       Process.detach(pid)
       pid
