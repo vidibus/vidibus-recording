@@ -57,7 +57,7 @@ module Vidibus::Recording
         maxloops = 10
         loop do
           begin
-            string = stdout.read_nonblock(1024)
+            string = stdout.read_nonblock(1024).force_encoding('UTF-8')
             log(string)
             extract_metadata(string) unless metadata
           rescue Errno::EAGAIN
