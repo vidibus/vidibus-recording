@@ -1,0 +1,109 @@
+module Vidibus::Recording
+  class Part
+    include Mongoid::Document
+    include Mongoid::Timestamps
+    include Vidibus::Recording::Helpers
+
+    embedded_in :recording, :polymorphic => true
+
+    field :number, :type => Integer
+    field :info, :type => Hash
+    field :size, :type => Integer
+    field :duration, :type => Integer
+    field :started_at, :type => DateTime
+    field :stopped_at, :type => DateTime
+
+    validates :number, :presence => true
+
+    before_destroy :remove_files
+
+    # Returns the file path of this part.
+    def data_file
+      @data_file ||= "#{basename}.f4v"
+    end
+
+    # # Returns the log file path of this part.
+    # def log_file
+    #   @log_file ||= "#{basename}.log"
+    # end
+
+    # Returns the YAML file path of this part.
+    def yml_file
+      @yml_file ||= "#{basename}.yml"
+    end
+
+    def has_data?
+      size.to_i > 0
+    end
+
+    def stopped?
+      !!stopped_at
+    end
+
+    def reset
+      remove_files
+      blanks = {}
+      [
+        :info,
+        :size,
+        :duration,
+        :started_at
+      ].map {|a| blanks[a] = nil }
+      update_attributes(blanks)
+    end
+
+    def track_progress
+      set_size
+      set_duration
+    end
+
+    def postprocess
+      process_yml_file
+      track_progress
+      self.stopped_at = Time.now
+      # save!
+    end
+
+    def start
+      self.started_at = Time.now
+      self.stopped_at = nil
+    end
+
+    private
+
+    def process_yml_file
+      if str = read_and_delete_file(yml_file)
+        if values = YAML::load(str)
+          fix_value_classes!(values)
+          self.info = values
+        end
+      end
+    end
+
+    def set_size
+      self.size = File.exists?(data_file) ? File.size(data_file) : 0
+    end
+
+    def set_duration
+      self.duration = has_data? ? Time.now - started_at : 0
+    end
+
+    def read_and_delete_file(file)
+      if File.exists?(file)
+        str = File.read(file)
+        File.delete(file)
+        str
+      end
+    end
+
+    def basename
+      "#{_parent.basename}_#{number}"
+    end
+
+    def remove_files
+      [data_file, yml_file].each do |f|
+        File.delete(f) if File.exists?(f)
+      end
+    end
+  end
+end

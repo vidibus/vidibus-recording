@@ -1,8 +1,13 @@
-# TODO: extend from Vidibus::Loop
+require 'timeout'
+
+# TODO: RENAME TO 'WORKER'
 
 module Vidibus::Recording
   class Job
     class ProcessError < StandardError; end
+
+    # START_TIMEOUT = 20
+    STOP_TIMEOUT = 5
 
     attr_accessor :recording, :pid, :metadata
 
@@ -15,10 +20,10 @@ module Vidibus::Recording
     def start
       self.pid = fork do
         begin
-          record!
+          record
         rescue => e
+          puts %(e.inspect = #{e.inspect.inspect})
           fail(e.inspect)
-          return
         end
       end
       Process.detach(pid)
@@ -26,18 +31,26 @@ module Vidibus::Recording
     end
 
     def stop
-      if pid and running?
-        Process.kill("SIGTERM", pid)
-        sleep 2
-        raise ProcessError.new("Recording job is still running!") if running?
+      if running?
+        begin
+          Timeout::timeout(STOP_TIMEOUT) do
+            begin
+              Process.kill('SIGTERM', pid)
+              Process.wait(pid)
+            rescue Errno::ECHILD
+            end
+          end
+        rescue Timeout::Error
+          begin
+            Process.kill('KILL', pid)
+          rescue
+          end
+        end
       end
     end
 
     def running?
-      pid and self.class.running?(pid)
-    end
-
-    def self.running?(pid)
+      return false unless pid
       begin
         Process.kill(0, pid)
         return true
@@ -46,29 +59,37 @@ module Vidibus::Recording
       rescue Errno::EPERM
         raise ProcessError.new("No permission to check #{pid}")
       rescue
-        raise ProcessError.new("Unable to determine status for #{pid}: #{$!}")
+        raise ProcessError.new("Unable to determine status of #{pid}: #{$!}")
       end
     end
 
     protected
 
-    def record!
-      Open3::popen3(recording.backend.command) do |stdin, stdout, stderr, process|
+    def record
+      cmd = recording.backend.command
+      log("START: #{recording.stream}", true)
+      Open3::popen3(cmd) do |stdin, stdout, stderr, process|
         maxloops = 10
         loop do
           begin
-            string = stdout.read_nonblock(1024).force_encoding('UTF-8')
+            string = stdout.read_nonblock(1024)
+            # string = string.force_encoding('UTF-8') # TODO: Does not work anymore under Ruby 1.8.
             log(string)
             extract_metadata(string) unless metadata
+            recording.backend.detect_error(string)
           rescue Errno::EAGAIN
           rescue EOFError
+            if metadata
+              halt('No more data!') && return
+            end
+          rescue Backend::RuntimeError => e
+            fail(e.message) && return
           end
 
           unless metadata
             maxloops -= 1
             if maxloops == 0
-              fail('No Metadata has been received. This stream does not work.')
-              return
+              halt('No Metadata has been received so far.') && return
             end
           end
           sleep 2
@@ -77,21 +98,29 @@ module Vidibus::Recording
       process.join
     end
 
-    def log(msg)
+    def log(msg, print_time = false)
+      if print_time
+        msg = "\n--- #{Time.now.strftime('%F %R:%S %z')}\n#{msg}\n\n"
+      end
       File.open(recording.log_file, "a") do |f|
         f.write(msg)
       end
     end
 
     def fail(msg)
-      log("\n\n---------\nError:\n#{msg}")
-      recording.fail(msg)
+      log("ERROR: #{msg}", true)
+      recording.reload.fail(msg)
+    end
+
+    def halt(msg)
+      log("HALT: #{msg}", true)
+      recording.reload.halt(msg)
     end
 
     def extract_metadata(string)
       self.metadata = recording.backend.extract_metadata(string)
       if metadata
-        File.open(recording.yml_file, "w") do |f|
+        File.open(recording.current_part.yml_file, 'w') do |f|
           f.write(metadata.to_yaml)
         end
       end

@@ -7,12 +7,13 @@ module Vidibus::Recording
 
     included do
       include ::Mongoid::Timestamps
-      include Vidibus::Recording::Helpers
       include Vidibus::Uuid::Mongoid
+
+      embeds_many :parts, :as => :recording, :class_name => 'Vidibus::Recording::Part'
 
       field :name
       field :stream
-      field :live, :type => Boolean
+      # field :live, :type => Boolean
       field :pid, :type => Integer
       field :info, :type => Hash
       field :size, :type => Integer
@@ -22,74 +23,115 @@ module Vidibus::Recording
       field :started_at, :type => DateTime
       field :stopped_at, :type => DateTime
       field :failed_at, :type => DateTime
+      field :running, :type => Boolean, :default => false
+      field :monitoring_job_id, :type => String
 
       validates :name, :presence => true
       validates :stream, :format => {:with => /^rtmp.*?:\/\/.+$/}
 
       before_destroy :cleanup
+
+      scope :ordered, desc(:started_at).desc(:created_at)
     end
 
     # Starts a recording job now, unless it has been done already.
     # Provide a Time object to schedule start.
     def start(time = :now)
-      return false if done? or started?
+      return false if done? || started?
       if time == :now
-        job.start
-        update_attributes(:pid => job.pid, :started_at => Time.now)
-        job.pid
+        self.started_at = Time.now
+        start_job
+        start_monitoring_job
+        save!
       else
         schedule(time)
       end
     end
 
-    # Resets data and stars anew.
-    def restart(time = :now)
+    # Continue recording that is not running anymore.
+    def resume
+      return false if done? || running? || !started?
+      start_job
+      start_monitoring_job
+      save!
+    end
+
+    # Resets data and starts anew.
+    def restart
       stop
       reset
-      start(time)
+      start
     end
 
     # Stops the recording job and starts postprocessing.
     def stop
-      return false if !started_at? or done?
+      return false if done? || !started?
       job.stop
       self.pid = nil
       self.stopped_at = Time.now
+      self.running = false
+      postprocess
+    end
+
+    # Gets called from recording job if it receives no more data.
+    def halt(msg = nil)
+      return false unless running?
+      job.stop
+      self.pid = nil
+      self.running = false
       postprocess
     end
 
     # Receives an error from recording job and stores it.
     # The job gets stopped and postprocessing is started.
     def fail(msg)
-      return if done?
+      return false unless running?
       job.stop
       self.pid = nil
       self.error = msg
       self.failed_at = Time.now
+      self.running = false
       postprocess
     end
 
-    # Removes all acquired data
+    # TODO: really a public method?
+    # Removes all acquired data!
     def reset
       remove_files
       blank = {}
-      [:started_at, :stopped_at, :failed_at, :info, :log, :error, :size, :duration].map {|a| blank[a] = nil }
-      update_attributes(blank)
+      [
+        :started_at,
+        :stopped_at,
+        :failed_at,
+        :info,
+        :error,
+        :size,
+        :duration,
+        :monitoring_job_id
+      ].map {|a| blank[a] = nil }
+      update_attributes!(blank)
+      destroy_all_parts
     end
 
+    # TODO: really a public method?
     # Returns an instance of the recording job.
     def job
       @job ||= Vidibus::Recording::Job.new(self)
     end
 
+    # TODO: really a public method?
     # Returns an instance of a fitting recording backend.
     def backend
-      @backend ||= Vidibus::Recording::Backend.load(:stream => stream, :file => file, :live => live)
+      @backend ||= Vidibus::Recording::Backend.load({
+        :stream => stream,
+        :file => current_part.data_file,
+        :live => true
+      })
     end
 
     # Returns true if recording has either been stopped or failed.
     def done?
-      stopped_at or failed?
+      stopped? || failed?
     end
 
     # Returns true if recording has failed.
@@ -102,15 +144,30 @@ module Vidibus::Recording
       !!started_at
     end
 
+    def stopped?
+      !!stopped_at
+    end
+
+    def has_data?
+      size.to_i > 0
+    end
+
     # Returns true if recording job is still running.
-    def running?
-      started? and job.running?
+    # Persists attributes accordingly.
+    def job_running?
+      if job.running?
+        update_attributes(:running => true) unless running?
+        true
+      else
+        update_attributes(:pid => nil, :running => false)
+        false
+      end
     end
 
     # Return folder to store recordings in.
     def folder
       @folder ||= begin
-        f = ["recordings"]
+        f = ['recordings']
         f.unshift(Rails.root) if defined?(Rails)
         path = File.join(f)
         FileUtils.mkdir_p(path) unless File.exist?(path)
@@ -118,57 +175,113 @@ module Vidibus::Recording
       end
     end
 
-    # Returns the file name of this recording.
-    def file
-      @file ||= "#{folder}/#{uuid}.rec"
+    def basename
+      "#{folder}/#{uuid}"
     end
 
     # Returns the log file name for this recording.
     def log_file
-      @log_file ||= file.gsub(/\.[^\.]+$/, ".log")
+      @log_file ||= "#{basename}.log"
+    end
+
+    # Returns the file name of this recording.
+    # DEPRECATED: this is kept for existing records only.
+    def file
+      @file ||= "#{basename}.rec"
     end
 
     # Returns the YAML file name for this recording.
+    # DEPRECATED: this is kept for existing records only.
     def yml_file
-      @info_file ||= file.gsub(/\.[^\.]+$/, ".yml")
+      @yml_file ||= "#{basename}.yml"
     end
 
-    protected
+    def current_part
+      parts.last
+    end
+
+    def track_progress
+      current_part.track_progress if current_part
+      set_size
+      set_duration
+      save!
+    end
+
+    private
+
+    def destroy_all_parts
+      parts.each do |part|
+        part.destroy
+      end
+      self.update_attributes!(:parts => [])
+    end
+
+    def start_job
+      return if job_running?
+      setup_next_part
+      job.start
+      self.running = true
+      self.pid = job.pid
+    end
+
+    # Start a new monitoring job if none exists
+    def start_monitoring_job(force = nil)
+      if !force && monitoring_job_id
+        begin
+          Delayed::Backend::Mongoid::Job.find(monitoring_job_id)
+          return
+        rescue ::Mongoid::Errors::DocumentNotFound
+        end
+      end
+      job = Vidibus::Recording::MonitoringJob.create({
+        :class_name => self.class.to_s,
+        :uuid => uuid
+      })
+      self.monitoring_job_id = job.id
+    end
+
+    def setup_next_part
+      number = nil
+      if current_part
+        if current_part.has_data?
+          number = current_part.number + 1
+        else
+          current_part.reset
+        end
+      else
+        number = 1
+      end
+      if number
+        parts.build(:number => number)
+      end
+      current_part.start
+    end
 
     def schedule(time)
       self.delay(:run_at => time).start
     end
 
     def postprocess
-      process_yml_file
+      current_part.postprocess if current_part
       set_size
       set_duration
       save!
     end
 
-    def process_yml_file
-      if str = read_file(yml_file)
-        if values = YAML::load(str)
-          fix_value_classes!(values)
-          self.info = values
-        end
-      end
-    end
-
     def set_size
-      self.size = File.exists?(file) ? File.size(file) : nil
+      accumulate_parts(:size)
     end
 
     def set_duration
-      self.duration = failed? ? 0 : Time.now - started_at
+      accumulate_parts(:duration)
     end
 
-    def read_file(file)
-      if File.exists?(file)
-        str = File.read(file)
-        File.delete(file)
-        str
+    def accumulate_parts(attr)
+      value = 0
+      parts.each do |part|
+        value += part.send(attr).to_i
       end
+      self.send("#{attr}=", value)
     end
 
     def cleanup
@@ -176,6 +289,7 @@ module Vidibus::Recording
       remove_files
     end
 
+    # DEPRECATED: this is kept for existing records only.
     def remove_files
       [file, log_file, yml_file].each do |f|
         File.delete(f) if File.exists?(f)

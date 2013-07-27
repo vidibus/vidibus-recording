@@ -5,6 +5,14 @@ module Vidibus::Recording::Backend
 
     attr_accessor :stream, :file, :live, :metadata
 
+    def self.executable=(path)
+      @executable = path
+    end
+
+    def self.executable
+      @executable || 'rtmpdump'
+    end
+
     # Sets up a new dumper.
     #
     # Required attributes:
@@ -14,9 +22,11 @@ module Vidibus::Recording::Backend
     #   :live
     #
     def initialize(attributes)
-      self.stream = attributes[:stream] or raise ConfigurationError.new("No input stream given")
-      self.file = attributes[:file] or raise ConfigurationError.new("No output file defined")
+      self.stream = attributes[:stream]
+      self.file = attributes[:file]
       self.live = attributes[:live]
+      raise ConfigurationError.new('No output file defined') unless file
+      raise ConfigurationError.new('No input stream given') unless stream
     end
 
     # Command for starting the recording.
@@ -26,16 +36,15 @@ module Vidibus::Recording::Backend
         a << "-o #{file}"
         a << "--live" if live
       end
-      %(rtmpdump #{args.join(" ")} 2>&1)
+      %(#{self.class.executable} #{args.join(" ")} 2>&1)
     end
 
     # Extract metadata from stdout or stderr.
     # Output delivered by rtmpdump looks like this:
     #
     # RTMPDump v2.2
-    # (c) 2010 Andrej Stepanchuk, Howard Chu, The Flvstreamer Team; license: GPL
+    # (c) 2010 Andrej Stepanchuk, Howard Chu, The Flvstreamer Team
     # Connecting ...
-    # ERROR: rtmp server sent error
     # Starting Live Stream
     # Metadata:
     #   author
@@ -67,6 +76,21 @@ module Vidibus::Recording::Backend
       if metadata = string.match(/#{prefix}Metadata\:\n(.+)\Z/m)
         tuples = $1.scan(/#{prefix}([^\n\ \d]+)\ +([^\ \n][^\n]+)\n/)
         self.metadata = Hash[tuples]
+      end
+    end
+
+    # Extract metadata from stdout or stderr.
+    # Output delivered by rtmpdump looks like this:
+    #
+    # RTMPDump v2.4
+    # (c) 2010 Andrej Stepanchuk, Howard Chu, The Flvstreamer Team
+    # Connecting ...
+    # ERROR: Problem accessing the DNS. (addr: whatever.domain)
+    #
+    def detect_error(string)
+      prefix = /(?:ERROR\:\ (.+))/ if string.match(/ERROR\:/)
+      if string.match(/(?:ERROR\:\ (.+))/)
+        raise RuntimeError.new($1)
       end
     end
   end
