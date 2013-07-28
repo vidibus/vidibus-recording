@@ -7,7 +7,7 @@ module Vidibus::Recording
     class ProcessError < StandardError; end
 
     # START_TIMEOUT = 20
-    STOP_TIMEOUT = 5
+    STOP_TIMEOUT = 10
 
     attr_accessor :recording, :pid, :metadata
 
