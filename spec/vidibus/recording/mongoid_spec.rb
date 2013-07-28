@@ -305,8 +305,6 @@ describe 'Vidibus::Recording::Mongoid' do
       end
 
       it 'should stop the recording worker' do
-        # How to mock this without getting an "unexpected return" error from fork?
-        # mock(this.job).stop
         this.stop
         this.worker_running?.should be_false
       end
@@ -362,7 +360,6 @@ describe 'Vidibus::Recording::Mongoid' do
         mock(this).postprocess
         this.fail('wtf')
       end
-
     end
   end
 
