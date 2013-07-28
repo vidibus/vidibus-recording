@@ -72,7 +72,7 @@ module Vidibus::Recording
     def record
       cmd = recording.backend.command
       log("START: #{recording.stream}", true)
-      Open3::popen3(cmd) do |stdin, stdout, stderr, process|
+      Open3::popen3(cmd) do |stdin, stdout, stderr|
         maxloops = 10
         loop do
           begin
@@ -99,7 +99,6 @@ module Vidibus::Recording
           sleep 2
         end
       end
-      process.join
     end
 
     def log(msg, print_header = false)
