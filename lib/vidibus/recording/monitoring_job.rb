@@ -35,7 +35,7 @@ module Vidibus::Recording
     private
 
     def recording
-      Recording.where(:uuid => @uuid).first
+      @class_name.constantize.where(:uuid => @uuid).first
     end
 
     def ensure_recording
