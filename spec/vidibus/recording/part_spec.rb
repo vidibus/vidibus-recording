@@ -46,8 +46,13 @@ describe 'Vidibus::Recording::Part' do
       part.has_data?.should be_false
     end
 
-    it 'should return true if this part has a size' do
-      stub(part).size {123}
+    it 'should return false if this part has a size smaller than 2000 bytes' do
+      stub(part).size {1999}
+      part.has_data?.should be_false
+    end
+
+    it 'should return true if this part has a size of at least 2000 bytes' do
+      stub(part).size {2000}
       part.has_data?.should be_true
     end
   end

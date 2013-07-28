@@ -4,6 +4,8 @@ module Vidibus::Recording
     include Mongoid::Timestamps
     include Vidibus::Recording::Helpers
 
+    SIZE_THRESHOLD = 2000
+
     embedded_in :recording, :polymorphic => true
 
     field :number, :type => Integer
@@ -33,7 +35,7 @@ module Vidibus::Recording
     end
 
     def has_data?
-      size.to_i > 0
+      size.to_i >= SIZE_THRESHOLD
     end
 
     def stopped?
