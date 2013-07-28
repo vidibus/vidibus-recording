@@ -2,9 +2,6 @@ module Vidibus::Recording
   module Mongoid
     extend ActiveSupport::Concern
 
-    class ProcessError < StandardError; end
-    class StreamError < StandardError; end
-
     included do
       include ::Mongoid::Timestamps
       include Vidibus::Uuid::Mongoid
