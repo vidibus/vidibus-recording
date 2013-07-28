@@ -47,6 +47,7 @@ module Vidibus::Recording
     def resume
       return false if running? || !started?
       self.stopped_at = nil
+      self.failed_at = nil
       start_worker
       start_monitoring_job
       save!
