@@ -46,6 +46,7 @@ module Vidibus::Recording
     # Continue recording that is not running anymore.
     def resume
       return false if running? || !started?
+      self.stopped_at = nil
       start_job
       start_monitoring_job
       save!
