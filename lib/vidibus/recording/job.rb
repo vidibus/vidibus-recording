@@ -40,6 +40,7 @@ module Vidibus::Recording
               Process.wait(pid)
               log('STOPPED')
             rescue Errno::ECHILD
+              log('STOPPED')
             end
           end
         rescue Timeout::Error
@@ -48,7 +49,8 @@ module Vidibus::Recording
             Process.kill('KILL', pid)
             Process.wait(pid)
             log('KILLED')
-          rescue
+          rescue Errno::ECHILD
+            log('KILLED')
           end
         end
       end
