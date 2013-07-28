@@ -61,9 +61,9 @@ module Vidibus::Recording
       rescue Errno::ESRCH
         return false
       rescue Errno::EPERM
-        raise ProcessError.new("No permission to check #{pid}")
+        raise ProcessError.new("No permission to check process #{pid}")
       rescue
-        raise ProcessError.new("Unable to determine status of #{pid}: #{$!}")
+        raise ProcessError.new("Unable to determine status of process #{pid}: #{$!}")
       end
     end
 
