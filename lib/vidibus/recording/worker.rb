@@ -77,8 +77,7 @@ module Vidibus::Recording
         maxloops = 10
         loop do
           begin
-            string = stdout.read_nonblock(1024)
-            # string = string.force_encoding('UTF-8') # TODO: Does not work anymore under Ruby 1.8.
+            string = stdout.read_nonblock(1024).force_encoding('UTF-8')
             log(string)
             extract_metadata(string) unless metadata
             recording.backend.detect_error(string)
