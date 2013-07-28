@@ -34,6 +34,11 @@ describe 'Vidibus::Recording::Mongoid' do
     end
   end
 
+  def job_payload_object
+    job = Delayed::Backend::Mongoid::Job.first
+    job.payload_object
+  end
+
   describe 'validation' do
     let(:this) do
       Recording.new({
@@ -147,10 +152,31 @@ describe 'Vidibus::Recording::Mongoid' do
         po.instance_variable_get('@class_name').should eq('Recording')
       end
 
-      it 'should should set the monitoring job id' do
+      it 'should should generate a unique identifier' do
+        uuid = '4c996890d99c0130df0238f6b1180e6b'
+        stub(Vidibus::Uuid).generate { uuid }
         this.start
-        job = Delayed::Backend::Mongoid::Job.first
-        this.monitoring_job_id.should eql(job.id.to_s)
+        this.monitoring_job_identifier.should eq(uuid)
+      end
+
+      it 'should store identifier on monitoring job' do
+        uuid = '4c996890d99c0130df0238f6b1180e6b'
+        stub(Vidibus::Uuid).generate { uuid }
+        this.start
+        po = job_payload_object
+        po.instance_variable_get('@identifier').should eq(uuid)
+      end
+
+      it 'should store uuid on monitoring job' do
+        this.start
+        po = job_payload_object
+        po.instance_variable_get('@uuid').should eq(this.uuid)
+      end
+
+      it 'should store class name on monitoring job' do
+        this.start
+        po = job_payload_object
+        po.instance_variable_get('@class_name').should eq('Recording')
       end
     end
 

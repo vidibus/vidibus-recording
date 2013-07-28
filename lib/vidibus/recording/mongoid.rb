@@ -24,7 +24,7 @@ module Vidibus::Recording
       field :stopped_at, :type => DateTime
       field :failed_at, :type => DateTime
       field :running, :type => Boolean, :default => false
-      field :monitoring_job_id, :type => String
+      field :monitoring_job_identifier, :type => String
 
       validates :name, :presence => true
       validates :stream, :format => {:with => /^rtmp.*?:\/\/.+$/}
@@ -68,6 +68,7 @@ module Vidibus::Recording
       self.pid = nil
       self.stopped_at = Time.now
       self.running = false
+      self.monitoring_job_identifier = nil
       postprocess
     end
 
@@ -105,7 +106,7 @@ module Vidibus::Recording
         :error,
         :size,
         :duration,
-        :monitoring_job_id
+        :monitoring_job_identifier
       ].map {|a| blank[a] = nil }
       update_attributes!(blank)
       destroy_all_parts
@@ -224,18 +225,19 @@ module Vidibus::Recording
 
     # Start a new monitoring job if none exists
     def start_monitoring_job(force = nil)
-      if !force && monitoring_job_id
+      if !force && monitoring_job_identifier
         begin
-          Delayed::Backend::Mongoid::Job.find(monitoring_job_id)
+          Delayed::Backend::Mongoid::Job.find(monitoring_job_identifier)
           return
         rescue ::Mongoid::Errors::DocumentNotFound
         end
       end
-      job = Vidibus::Recording::MonitoringJob.create({
+      self.monitoring_job_identifier = Vidibus::Uuid.generate
+      Vidibus::Recording::MonitoringJob.create({
         :class_name => self.class.to_s,
-        :uuid => uuid
+        :uuid => uuid,
+        :identifier => monitoring_job_identifier
       })
-      self.monitoring_job_id = job.id
     end
 
     def setup_next_part

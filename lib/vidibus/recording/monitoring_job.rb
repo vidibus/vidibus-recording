@@ -9,6 +9,9 @@ module Vidibus::Recording
       unless @class_name = args[:class_name]
         raise(ArgumentError, 'Must provide class name of recording')
       end
+      unless @identifier = args[:identifier]
+        raise(ArgumentError, 'Must provide identifier of monitoring job')
+      end
       ensure_recording
     end
 
@@ -40,7 +43,9 @@ module Vidibus::Recording
     end
 
     def run_again
-      obj = self.class.new(:uuid => @uuid, :class_name => @class_name )
+      obj = self.class.new({
+        :uuid => @uuid, :class_name => @class_name, :identifier => @identifier
+      })
       Delayed::Job.enqueue(obj, 0, INTERVAL.from_now)
     end
   end
