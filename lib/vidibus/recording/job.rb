@@ -22,7 +22,6 @@ module Vidibus::Recording
         begin
           record
         rescue => e
-          puts %(e.inspect = #{e.inspect.inspect})
           fail(e.inspect)
         end
       end
