@@ -3,8 +3,9 @@
 Allows recording of RTMP video streams. Uses RTMPdump.
 Further description goes here.
 
+Requires Ruby 1.9
 
 
 == Copyright
 
-Copyright (c) 2011 Andre Pankratz. See LICENSE for details.
+Copyright (c) 2013 Andre Pankratz. See LICENSE for details.
