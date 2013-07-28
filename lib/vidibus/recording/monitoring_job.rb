@@ -21,7 +21,7 @@ module Vidibus::Recording
       if r.job_running?
         r.track_progress
         run_again
-      else
+      elsif !r.stopped?
         r.resume
       end
     end

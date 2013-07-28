@@ -192,11 +192,6 @@ describe 'Vidibus::Recording::Mongoid' do
   end
 
   describe '#resume' do
-    it 'should return false if stream has been stopped' do
-      mock(this).stopped? { true }
-      this.resume.should be_false
-    end
-
     it 'should return false unless stream has been started' do
       mock(this).started? { false }
       this.resume.should be_false
@@ -210,6 +205,12 @@ describe 'Vidibus::Recording::Mongoid' do
     context 'with a started job' do
       before do
         mock(this).started? { true }
+      end
+
+      it 'should work even if stream has been stopped' do
+        stub(this).stopped? { true }
+        mock(this).start_job
+        this.resume
       end
 
       it 'should call #start_job' do
