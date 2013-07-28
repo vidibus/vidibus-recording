@@ -1,9 +1,7 @@
 require 'timeout'
 
-# TODO: RENAME TO 'WORKER'
-
 module Vidibus::Recording
-  class Job
+  class Worker
     class ProcessError < StandardError; end
 
     # START_TIMEOUT = 20

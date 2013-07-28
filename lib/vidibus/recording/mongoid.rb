@@ -29,13 +29,13 @@ module Vidibus::Recording
       before_destroy :cleanup
     end
 
-    # Starts a recording job now, unless it has been done already.
+    # Starts a recording worker now, unless it has been done already.
     # Provide a Time object to schedule start.
     def start(time = :now)
       return false if done? || started?
       if time == :now
         self.started_at = Time.now
-        start_job
+        start_worker
         start_monitoring_job
         save!
       else
@@ -47,7 +47,7 @@ module Vidibus::Recording
     def resume
       return false if running? || !started?
       self.stopped_at = nil
-      start_job
+      start_worker
       start_monitoring_job
       save!
     end
@@ -59,10 +59,10 @@ module Vidibus::Recording
       start
     end
 
-    # Stops the recording job and starts postprocessing.
+    # Stops the recording worker and starts postprocessing.
     def stop
       return false if done? || !started?
-      job.stop
+      worker.stop
       self.pid = nil
       self.stopped_at = Time.now
       self.running = false
@@ -70,20 +70,20 @@ module Vidibus::Recording
       postprocess
     end
 
-    # Gets called from recording job if it receives no more data.
+    # Gets called from recording worker if it receives no more data.
     def halt(msg = nil)
       return false unless running?
-      job.stop
+      worker.stop
       self.pid = nil
       self.running = false
       postprocess
     end
 
-    # Receives an error from recording job and stores it.
-    # The job gets stopped and postprocessing is started.
+    # Receives an error from recording worker and stores it.
+    # The worker gets stopped and postprocessing is started.
     def fail(msg)
       return false unless running?
-      job.stop
+      worker.stop
       self.pid = nil
       self.error = msg
       self.failed_at = Time.now
@@ -111,9 +111,9 @@ module Vidibus::Recording
     end
 
     # TODO: really a public method?
-    # Returns an instance of the recording job.
-    def job
-      @job ||= Vidibus::Recording::Job.new(self)
+    # Returns an instance of the recording worker.
+    def worker
+      @worker ||= Vidibus::Recording::Worker.new(self)
     end
 
     # TODO: really a public method?
@@ -136,7 +136,7 @@ module Vidibus::Recording
       !!failed_at
     end
 
-    # Returns true if if job has been started.
+    # Returns true if recording has been started.
     def started?
       !!started_at
     end
@@ -149,10 +149,10 @@ module Vidibus::Recording
       size.to_i > 0
     end
 
-    # Returns true if recording job is still running.
+    # Returns true if recording worker is still running.
     # Persists attributes accordingly.
-    def job_running?
-      if job.running?
+    def worker_running?
+      if worker.running?
         update_attributes(:running => true) unless running?
         true
       else
@@ -213,12 +213,12 @@ module Vidibus::Recording
       self.update_attributes!(:parts => [])
     end
 
-    def start_job
-      return if job_running?
+    def start_worker
+      return if worker_running?
       setup_next_part
-      job.start
+      worker.start
       self.running = true
-      self.pid = job.pid
+      self.pid = worker.pid
     end
 
     # Start a new monitoring job
@@ -276,7 +276,7 @@ module Vidibus::Recording
     end
 
     def cleanup
-      job.stop
+      worker.stop
       remove_files
     end
 

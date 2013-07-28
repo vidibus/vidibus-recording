@@ -73,9 +73,9 @@ describe 'Vidibus::Recording::Mongoid' do
     end
   end
 
-  describe '#job' do
-    it 'should return a job instance' do
-      this.job.should be_an_instance_of(Vidibus::Recording::Job)
+  describe '#worker' do
+    it 'should return a worker instance' do
+      this.worker.should be_an_instance_of(Vidibus::Recording::Worker)
     end
   end
 
@@ -99,8 +99,8 @@ describe 'Vidibus::Recording::Mongoid' do
     end
 
     context 'without params' do
-      it 'should call #start_job' do
-        mock(this).start_job
+      it 'should call #start_worker' do
+        mock(this).start_worker
         this.start
       end
 
@@ -116,12 +116,12 @@ describe 'Vidibus::Recording::Mongoid' do
 
       it 'should start a recording job' do
         this.start
-        this.job_running?.should be_true
+        this.worker_running?.should be_true
       end
 
       it 'should set the process id' do
-        stub(this.job).start
-        mock(this.job).pid.any_number_of_times {123}
+        stub(this.worker).start
+        mock(this.worker).pid.any_number_of_times {123}
         this.start
         this.pid.should eq(123)
       end
@@ -209,12 +209,12 @@ describe 'Vidibus::Recording::Mongoid' do
 
       it 'should work even if stream has been stopped' do
         stub(this).stopped? { true }
-        mock(this).start_job
+        mock(this).start_worker
         this.resume
       end
 
-      it 'should call #start_job' do
-        mock(this).start_job
+      it 'should call #start_worker' do
+        mock(this).start_worker
         this.resume
       end
 
@@ -285,7 +285,7 @@ describe 'Vidibus::Recording::Mongoid' do
       this.stop.should be_false
     end
 
-    context 'with a running job' do
+    context 'with a running worker' do
       before {this.start}
 
       it 'should reset the pid' do
@@ -304,11 +304,11 @@ describe 'Vidibus::Recording::Mongoid' do
         this.stopped_at.should eq(Time.now)
       end
 
-      it 'should stop the recording job' do
+      it 'should stop the recording worker' do
         # How to mock this without getting an "unexpected return" error from fork?
         # mock(this.job).stop
         this.stop
-        this.job_running?.should be_false
+        this.worker_running?.should be_false
       end
 
       it 'should start postprocessing' do
@@ -329,7 +329,7 @@ describe 'Vidibus::Recording::Mongoid' do
       this.fail('wtf').should be_false
     end
 
-    context 'with a running job' do
+    context 'with a running worker' do
       before {this.start}
 
       it 'should reset the pid' do
@@ -348,9 +348,9 @@ describe 'Vidibus::Recording::Mongoid' do
         this.failed_at.should eq(Time.now)
       end
 
-      it 'should stop the recording job' do
+      it 'should stop the recording worker' do
         this.fail('wtf')
-        this.job_running?.should be_false
+        this.worker_running?.should be_false
       end
 
       it 'should set the error' do
@@ -372,42 +372,42 @@ describe 'Vidibus::Recording::Mongoid' do
     end
   end
 
-  describe '#job_running?' do
-    context 'without a running job' do
+  describe '#worker_running?' do
+    context 'without a running worker' do
       it 'should return false' do
-        this.job_running?.should be_false
+        this.worker_running?.should be_false
       end
     end
 
-    context 'with a started job' do
+    context 'with a started worker' do
       before {this.start}
 
       it 'should return true' do
-        this.job_running?.should be_true
+        this.worker_running?.should be_true
       end
 
       context 'that has been stopped already' do
-        before {this.job.stop}
+        before {this.worker.stop}
 
         it 'should return false' do
-          this.job_running?.should be_false
+          this.worker_running?.should be_false
         end
       end
-
     end
   end
 
-  describe '#job.stop' do
+  # TODO: use separate worker specs
+  describe '#worker.stop' do
     before {this.start}
 
-    it 'should stop the recording job' do
-      this.job.stop
-      this.job_running?.should be_false
+    it 'should stop the recording worker' do
+      this.worker.stop
+      this.worker_running?.should be_false
     end
 
     it 'should kill the process' do
       pid = this.pid
-      this.job.stop
+      this.worker.stop
       process_alive?(pid).should be_false
     end
   end
