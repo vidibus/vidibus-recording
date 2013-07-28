@@ -220,15 +220,8 @@ module Vidibus::Recording
       self.pid = job.pid
     end
 
-    # Start a new monitoring job if none exists
-    def start_monitoring_job(force = nil)
-      if !force && monitoring_job_identifier
-        begin
-          Delayed::Backend::Mongoid::Job.find(monitoring_job_identifier)
-          return
-        rescue ::Mongoid::Errors::DocumentNotFound
-        end
-      end
+    # Start a new monitoring job
+    def start_monitoring_job
       self.monitoring_job_identifier = Vidibus::Uuid.generate
       Vidibus::Recording::MonitoringJob.create({
         :class_name => self.class.to_s,
