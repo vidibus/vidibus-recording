@@ -98,10 +98,13 @@ module Vidibus::Recording
       process.join
     end
 
-    def log(msg, print_time = false)
-      if print_time
-        msg = "\n--- #{Time.now.strftime('%F %R:%S %z')}\n#{msg}\n\n"
+    def log(msg, print_header = false)
+      if print_header
+        header = "--- #{Time.now.strftime('%F %R:%S %z')}"
+        header << " | Process #{Process.pid}"
+        msg = "#{header}\n#{msg}\n"
       end
+      msg = "\n#{msg}" unless msg[/A\n/]
       File.open(recording.log_file, "a") do |f|
         f.write(msg)
       end
