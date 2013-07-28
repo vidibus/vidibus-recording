@@ -84,16 +84,16 @@ module Vidibus::Recording
           rescue Errno::EAGAIN
           rescue EOFError
             if metadata
-              halt('No more data!') && return
+              halt('No more data!') && break
             end
           rescue Backend::RuntimeError => e
-            fail(e.message) && return
+            fail(e.message) && break
           end
 
           unless metadata
             maxloops -= 1
             if maxloops == 0
-              halt('No Metadata has been received so far.') && return
+              halt('No Metadata has been received so far.') && break
             end
           end
           sleep 2
