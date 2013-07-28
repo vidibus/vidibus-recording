@@ -17,6 +17,7 @@ module Vidibus::Recording
 
     def perform
       r = recording.reload
+      return unless r.monitoring_job_identifier == @identifier
       if r.job_running?
         r.track_progress
         run_again
