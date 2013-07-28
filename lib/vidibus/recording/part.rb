@@ -24,11 +24,6 @@ module Vidibus::Recording
       @data_file ||= "#{basename}.f4v"
     end
 
-    # # Returns the log file path of this part.
-    # def log_file
-    #   @log_file ||= "#{basename}.log"
-    # end
-
     # Returns the YAML file path of this part.
     def yml_file
       @yml_file ||= "#{basename}.yml"

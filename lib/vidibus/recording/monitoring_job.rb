@@ -36,7 +36,6 @@ module Vidibus::Recording
 
     def recording
       Recording.where(:uuid => @uuid).first
-      # Don't store instance variable because it will bloat the job record!
     end
 
     def ensure_recording

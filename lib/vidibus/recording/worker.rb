@@ -89,7 +89,6 @@ module Vidibus::Recording
           rescue Backend::RuntimeError => e
             fail(e.message) && break
           end
-
           unless metadata
             maxloops -= 1
             if maxloops == 0
