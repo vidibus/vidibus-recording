@@ -1,5 +1,4 @@
 require 'vidibus/recording/worker'
-require 'vidibus/recording/monitoring_job'
 require 'vidibus/recording/backend'
 require 'vidibus/recording/helpers'
 require 'vidibus/recording/part'

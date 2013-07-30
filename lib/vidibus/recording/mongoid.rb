@@ -26,7 +26,6 @@ module Vidibus::Recording
       field :failed_at, :type => DateTime
       field :started, :type => Boolean, :default => false
       field :running, :type => Boolean, :default => false
-      field :monitoring_job_identifier, :type => String
 
       index :started
 
@@ -46,7 +45,6 @@ module Vidibus::Recording
         self.started_at = Time.now
         self.started = true
         start_worker
-        start_monitoring_job
         save!
       else
         schedule(time)
@@ -59,7 +57,6 @@ module Vidibus::Recording
       self.stopped_at = nil
       self.failed_at = nil
       start_worker
-      start_monitoring_job
       save!
     end
 
@@ -78,7 +75,6 @@ module Vidibus::Recording
       self.stopped_at = Time.now
       self.running = false
       self.started = false
-      self.monitoring_job_identifier = nil
       postprocess
     end
 
@@ -116,8 +112,7 @@ module Vidibus::Recording
         :info,
         :error,
         :size,
-        :duration,
-        :monitoring_job_identifier
+        :duration
       ].map {|a| blank[a] = nil }
       update_attributes!(blank)
       destroy_all_parts
@@ -232,16 +227,6 @@ module Vidibus::Recording
       worker.start
       self.running = true
       self.pid = worker.pid
-    end
-
-    # Start a new monitoring job
-    def start_monitoring_job
-      self.monitoring_job_identifier = Vidibus::Uuid.generate
-      Vidibus::Recording::MonitoringJob.create({
-        :class_name => self.class.to_s,
-        :uuid => uuid,
-        :identifier => monitoring_job_identifier
-      })
     end
 
     def setup_next_part
