@@ -34,6 +34,8 @@ module Vidibus::Recording
       validates :stream, :format => {:with => /^rtmp.*?:\/\/.+$/}
 
       before_destroy :cleanup
+
+      scope :started, where(started: true)
     end
 
     # Starts a recording worker now, unless it has been done already.

@@ -425,4 +425,20 @@ describe 'Vidibus::Recording::Mongoid' do
   end
 
   after {cleanup(this)}
+
+  describe '.started' do
+    it 'should return a Mongoid::Criteria' do
+      Recording.started.should be_a(Mongoid::Criteria)
+    end
+
+    it 'should find all started recordings' do
+      this.start
+      Recording.started.to_a.should eq([this])
+    end
+
+    it 'should not find recordings that have not been started' do
+      this
+      Recording.started.to_a.should eq([])
+    end
+  end
 end
