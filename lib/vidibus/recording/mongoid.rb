@@ -1,3 +1,8 @@
+require 'mongoid'
+require 'vidibus-uuid'
+require 'active_support/core_ext'
+require 'delayed_job_mongoid'
+
 module Vidibus::Recording
   module Mongoid
     extend ActiveSupport::Concern

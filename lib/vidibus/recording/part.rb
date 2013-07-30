@@ -1,3 +1,7 @@
+require 'yaml'
+require 'mongoid'
+require 'vidibus-uuid'
+
 module Vidibus::Recording
   class Part
     include Mongoid::Document

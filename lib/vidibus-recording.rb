@@ -1,8 +1,3 @@
-require 'open3'
-require 'yaml'
-require 'delayed_job_mongoid'
-require 'active_support/core_ext'
-require 'vidibus-uuid'
 
 module Vidibus
   module Recording
