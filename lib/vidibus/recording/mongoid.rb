@@ -15,7 +15,6 @@ module Vidibus::Recording
 
       field :name
       field :stream
-      # field :live, :type => Boolean
       field :pid, :type => Integer
       field :info, :type => Hash
       field :size, :type => Integer
