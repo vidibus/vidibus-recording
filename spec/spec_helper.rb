@@ -12,6 +12,9 @@ require "app/models/recording"
 
 Dir[File.expand_path('spec/support/**/*.rb')].each { |f| require f }
 
+# Silence logger
+Vidibus::Recording.logger = Logger.new('/dev/null')
+
 Mongoid.configure do |config|
   name = "vidibus-recording_test"
   host = "localhost"
