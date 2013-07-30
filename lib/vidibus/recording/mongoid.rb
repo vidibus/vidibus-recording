@@ -24,8 +24,11 @@ module Vidibus::Recording
       field :started_at, :type => DateTime
       field :stopped_at, :type => DateTime
       field :failed_at, :type => DateTime
+      field :started, :type => Boolean, :default => false
       field :running, :type => Boolean, :default => false
       field :monitoring_job_identifier, :type => String
+
+      index :started
 
       validates :name, :presence => true
       validates :stream, :format => {:with => /^rtmp.*?:\/\/.+$/}
@@ -39,6 +42,7 @@ module Vidibus::Recording
       return false if done? || started?
       if time == :now
         self.started_at = Time.now
+        self.started = true
         start_worker
         start_monitoring_job
         save!
@@ -71,6 +75,7 @@ module Vidibus::Recording
       self.pid = nil
       self.stopped_at = Time.now
       self.running = false
+      self.started = false
       self.monitoring_job_identifier = nil
       postprocess
     end
@@ -93,6 +98,7 @@ module Vidibus::Recording
       self.error = msg
       self.failed_at = Time.now
       self.running = false
+      self.started = false
       postprocess
     end
 

@@ -98,6 +98,12 @@ describe 'Vidibus::Recording::Mongoid' do
       this.start.should be_false
     end
 
+    it 'should set #started to true' do
+      stub(this).start_worker
+      this.start
+      this.started.should be_true
+    end
+
     context 'without params' do
       it 'should call #start_worker' do
         mock(this).start_worker
@@ -281,6 +287,13 @@ describe 'Vidibus::Recording::Mongoid' do
       this.stop.should be_false
     end
 
+    it 'should set #started to false' do
+      stub(this).start_worker
+      this.start
+      this.stop
+      this.started.should be_false
+    end
+
     context 'with a running worker' do
       before {this.start}
 
@@ -321,6 +334,12 @@ describe 'Vidibus::Recording::Mongoid' do
     it 'should return false if recording is done' do
       this.stopped_at = Time.now
       this.fail('wtf').should be_false
+    end
+
+    it 'should set #started to false' do
+      this.start
+      this.fail('wtf')
+      this.started.should be_false
     end
 
     context 'with a running worker' do
