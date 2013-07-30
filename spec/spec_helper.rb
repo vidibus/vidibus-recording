@@ -10,6 +10,8 @@ require "mongoid"
 require "vidibus-recording"
 require "app/models/recording"
 
+Dir[File.expand_path('spec/support/**/*.rb')].each { |f| require f }
+
 Mongoid.configure do |config|
   name = "vidibus-recording_test"
   host = "localhost"
