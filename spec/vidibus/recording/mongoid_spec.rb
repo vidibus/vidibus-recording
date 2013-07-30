@@ -145,11 +145,7 @@ describe 'Vidibus::Recording::Mongoid' do
       it 'should create a monitoring job' do
         this.start
         Delayed::Backend::Mongoid::Job.count.should eq(1)
-        job = Delayed::Backend::Mongoid::Job.first
-        job.payload_object.should be_a(Vidibus::Recording::MonitoringJob)
-        po = job.payload_object
-        po.instance_variable_get('@uuid').should eq(this.uuid)
-        po.instance_variable_get('@class_name').should eq('Recording')
+        job_payload_object.should be_a(Vidibus::Recording::MonitoringJob)
       end
 
       it 'should should generate a unique identifier' do
