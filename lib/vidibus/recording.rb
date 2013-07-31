@@ -50,10 +50,11 @@ module Vidibus
               if recording.worker_running?
                 recording.track_progress
               else
+                logger.info("[#{Time.now.utc}] - Resuming #{recording.class.name} #{recording.uuid}")
                 recording.resume
               end
             rescue => e
-              logger.error("[#{Time.now.utc}] - ERROR in Vidibus::Recorder.monitor:\n#{e.inspect}\n---\n#{e.backtrace.join("\n")}")
+              logger.error("[#{Time.now.utc}] - ERROR:\n#{e.inspect}\n---\n#{e.backtrace.join("\n")}")
             end
           end
         end
