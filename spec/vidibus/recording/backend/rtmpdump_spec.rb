@@ -3,17 +3,21 @@ require 'vidibus/recording/backend/rtmpdump'
 
 describe 'Vidibus::Recording::Backend::Rtmpdump' do
 
+  def read_log(name)
+    File.read("spec/support/backend/rtmpdump/#{name}.stdout")
+  end
+
   let(:this) do
     Vidibus::Recording::Backend::Rtmpdump.new({
       :stream => 'rtmp://test', :file => 'test.rec'
     })
   end
-  let(:log_v22) { File.read('spec/log/v22.log') }
-  let(:log_v23) { File.read('spec/log/v23.log') }
+  let(:success_v22) { read_log('success_v22') }
+  let(:success_v23) { read_log('success_v23') }
 
   describe 'extract_metadata' do
     it 'should extract relevant metadata from RTMPDump v2.2' do
-      this.extract_metadata(log_v22).should eql({
+      this.extract_metadata(success_v22).should eql({
         'presetname' => 'Custom',
         'creationdate' => 'Mon Jan 17 15:22:50 2011',
         'videodevice' => 'Osprey-210 Video Device 1',
@@ -34,7 +38,7 @@ describe 'Vidibus::Recording::Backend::Rtmpdump' do
     end
 
     it 'should extract relevant metadata from RTMPDump v2.3' do
-      this.extract_metadata(log_v23).should eql({
+      this.extract_metadata(success_v23).should eql({
         'presetname' => 'Custom',
         'creationdate' => 'Mon Jan 17 15:22:50 2011',
         'videodevice' => 'Osprey-210 Video Device 1',
