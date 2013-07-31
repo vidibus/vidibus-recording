@@ -3,8 +3,8 @@ require 'spec_helper'
 describe 'Vidibus::Recording::Mongoid' do
   let(:this) do
     Recording.create({
-      :name => 'N-TV Live',
-      :stream => 'rtmp://fms.rtl.de/ntvlive/livestream/channel1'
+      :name => 'Example Stream',
+      :stream => 'rtmp://example.host'
     })
   end
 
@@ -35,8 +35,8 @@ describe 'Vidibus::Recording::Mongoid' do
   describe 'validation' do
     let(:this) do
       Recording.new({
-        :name => 'N-TV Live',
-        :stream => 'rtmp://fms.rtl.de/ntvlive/livestream/channel1',
+        :name => 'Example Stream',
+        :stream => 'rtmp://example.host',
         :live => true
       })
     end

@@ -15,8 +15,8 @@ describe Vidibus::Recording do
   describe '.monitor' do
     let(:recording) do
       Recording.create({
-        :name => 'N-TV Live',
-        :stream => 'rtmp://fms.rtl.de/ntvlive/livestream/channel1'
+        :name => 'Example Stream',
+        :stream => 'rtmp://example.host'
       })
     end
 
