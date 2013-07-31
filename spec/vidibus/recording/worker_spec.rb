@@ -21,6 +21,15 @@ describe Vidibus::Recording::Worker do
     stub(Process).detach(pid)
   end
 
+  def process_alive?(pid)
+    begin
+      Process.kill(0, pid)
+      return true
+    rescue Errno::ESRCH
+      return false
+    end
+  end
+
   describe '#start' do
     it 'should fork and detach a separate process' do
       mock(subject).fork {123}
@@ -37,6 +46,18 @@ describe Vidibus::Recording::Worker do
         mock(subject).record
         subject.start
       end
+    end
+  end
+
+  describe '#stop' do
+    before do
+      subject.start
+    end
+
+    it 'should kill the process' do
+      pid = subject.pid
+      subject.stop
+      process_alive?(pid).should be_false
     end
   end
 end
