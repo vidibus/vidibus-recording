@@ -88,7 +88,6 @@ module Vidibus::Recording::Backend
     # ERROR: Problem accessing the DNS. (addr: whatever.domain)
     #
     def detect_error(string)
-      prefix = /(?:ERROR\:\ (.+))/ if string.match(/ERROR\:/)
       if string.match(/(?:ERROR\:\ (.+))/)
         raise RuntimeError.new($1)
       end
