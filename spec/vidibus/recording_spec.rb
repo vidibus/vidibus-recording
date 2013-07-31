@@ -62,7 +62,6 @@ describe Vidibus::Recording do
         before do
           stub(recording).start_worker
           recording.start
-          stub(Recording).started { [recording] }
         end
 
         it 'should log exceptions' do
