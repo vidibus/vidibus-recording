@@ -166,6 +166,12 @@ describe 'Vidibus::Recording::Mongoid' do
         mock(this).started? { true }
       end
 
+      it 'should set #active to true' do
+        stub(this).start_worker
+        this.resume
+        this.active.should be_true
+      end
+
       it 'should work even if stream has been stopped' do
         stub(this).stopped? { true }
         mock(this).start_worker

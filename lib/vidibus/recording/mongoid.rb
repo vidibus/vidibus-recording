@@ -56,6 +56,7 @@ module Vidibus::Recording
       return false if running? || !started?
       self.stopped_at = nil
       self.failed_at = nil
+      self.active = true
       start_worker
       save!
     end
