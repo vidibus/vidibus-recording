@@ -24,17 +24,17 @@ module Vidibus::Recording
       field :started_at, :type => DateTime
       field :stopped_at, :type => DateTime
       field :failed_at, :type => DateTime
-      field :started, :type => Boolean, :default => false
+      field :active, :type => Boolean, :default => false
       field :running, :type => Boolean, :default => false
 
-      index :started
+      index :active
 
       validates :name, :presence => true
       validates :stream, :format => {:with => /^rtmp.*?:\/\/.+$/}
 
       before_destroy :cleanup
 
-      scope :started, where(started: true)
+      scope :active, where(active: true)
     end
 
     # Starts a recording worker now, unless it has been done already.
@@ -43,7 +43,7 @@ module Vidibus::Recording
       return false if done? || started?
       if time == :now
         self.started_at = Time.now
-        self.started = true
+        self.active = true
         start_worker
         save!
       else
@@ -74,7 +74,7 @@ module Vidibus::Recording
       self.pid = nil
       self.stopped_at = Time.now
       self.running = false
-      self.started = false
+      self.active = false
       postprocess
     end
 
@@ -96,7 +96,7 @@ module Vidibus::Recording
       self.error = msg
       self.failed_at = Time.now
       self.running = false
-      self.started = false
+      self.active = false
       postprocess
     end
 

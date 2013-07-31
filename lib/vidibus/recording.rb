@@ -45,7 +45,7 @@ module Vidibus
     def run
       loop do
         classes.each do |klass|
-          klass.started.each do |recording|
+          klass.active.each do |recording|
             begin
               if recording.worker_running?
                 recording.track_progress

@@ -93,10 +93,10 @@ describe 'Vidibus::Recording::Mongoid' do
       this.start.should be_false
     end
 
-    it 'should set #started to true' do
+    it 'should set #active to true' do
       stub(this).start_worker
       this.start
-      this.started.should be_true
+      this.active.should be_true
     end
 
     context 'without params' do
@@ -239,11 +239,11 @@ describe 'Vidibus::Recording::Mongoid' do
       this.stop.should be_false
     end
 
-    it 'should set #started to false' do
+    it 'should set #active to false' do
       stub(this).start_worker
       this.start
       this.stop
-      this.started.should be_false
+      this.active.should be_false
     end
 
     context 'with a running worker' do
@@ -288,10 +288,10 @@ describe 'Vidibus::Recording::Mongoid' do
       this.fail('wtf').should be_false
     end
 
-    it 'should set #started to false' do
+    it 'should set #active to false' do
       this.start
       this.fail('wtf')
-      this.started.should be_false
+      this.active.should be_false
     end
 
     context 'with a running worker' do
@@ -378,19 +378,19 @@ describe 'Vidibus::Recording::Mongoid' do
 
   after {cleanup(this)}
 
-  describe '.started' do
+  describe '.active' do
     it 'should return a Mongoid::Criteria' do
-      Recording.started.should be_a(Mongoid::Criteria)
+      Recording.active.should be_a(Mongoid::Criteria)
     end
 
-    it 'should find all started recordings' do
+    it 'should find all active recordings' do
       this.start
-      Recording.started.to_a.should eq([this])
+      Recording.active.to_a.should eq([this])
     end
 
-    it 'should not find recordings that have not been started' do
+    it 'should not find recordings that are not active' do
       this
-      Recording.started.to_a.should eq([])
+      Recording.active.to_a.should eq([])
     end
   end
 end
