@@ -18,7 +18,7 @@ describe Vidibus::Recording::Worker do
       block.call
       pid
     end
-    mock(Process).detach(pid)
+    stub(Process).detach(pid)
   end
 
   describe '#start' do
