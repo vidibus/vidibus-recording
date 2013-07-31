@@ -8,26 +8,28 @@ describe 'Vidibus::Recording::Mongoid' do
     })
   end
 
+  let(:worker) do
+    Vidibus::Recording::Worker.new(this)
+  end
+
   def cleanup(recording)
-    if recording.pid
-      begin
-        Process.kill('SIGTERM', recording.pid)
-      rescue Errno::ESRCH
-      end
-    end
     delete_safely(recording.file)
     delete_safely(recording.log_file)
     delete_safely(recording.yml_file)
   end
 
-
-  def process_alive?(pid)
-    begin
-      Process.kill(0, pid)
-      return true
-    rescue Errno::ESRCH
-      return false
+  def stub_worker
+    stub(this).worker { worker }
+    stub(worker).record { true }
+    stub(worker).fork do |block|
+      block.call
+      123
     end
+    stub(Process).detach.with_any_args
+  end
+
+  before do
+    stub_worker
   end
 
   describe 'validation' do
@@ -107,6 +109,7 @@ describe 'Vidibus::Recording::Mongoid' do
       end
 
       it 'should start a recording job' do
+        stub(this.worker).running?.times(2) { true }
         this.start
         this.worker_running?.should be_true
       end
@@ -297,7 +300,10 @@ describe 'Vidibus::Recording::Mongoid' do
     end
 
     context 'with a running worker' do
-      before {this.start}
+      before do
+        stub_worker
+        this.start
+      end
 
       it 'should reset the pid' do
         this.fail('wtf')
@@ -348,7 +354,13 @@ describe 'Vidibus::Recording::Mongoid' do
     context 'with a started worker' do
       before {this.start}
 
+      it 'should call job#running?' do
+        mock(this.worker).running? { true }
+        this.worker_running?
+      end
+
       it 'should return true' do
+        stub(this.worker).running? { true }
         this.worker_running?.should be_true
       end
 
@@ -361,24 +373,6 @@ describe 'Vidibus::Recording::Mongoid' do
       end
     end
   end
-
-  # TODO: use separate worker specs
-  describe '#worker.stop' do
-    before {this.start}
-
-    it 'should stop the recording worker' do
-      this.worker.stop
-      this.worker_running?.should be_false
-    end
-
-    it 'should kill the process' do
-      pid = this.pid
-      this.worker.stop
-      process_alive?(pid).should be_false
-    end
-  end
-
-  after {cleanup(this)}
 
   describe '.active' do
     it 'should return a Mongoid::Criteria' do
@@ -395,4 +389,6 @@ describe 'Vidibus::Recording::Mongoid' do
       Recording.active.to_a.should eq([])
     end
   end
+
+  after {cleanup(this)}
 end
