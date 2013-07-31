@@ -7,7 +7,7 @@ describe 'Vidibus::Recording::Backend::Rtmpdump' do
     File.read("spec/support/backend/rtmpdump/#{name}.stdout")
   end
 
-  let(:this) do
+  let(:subject) do
     Vidibus::Recording::Backend::Rtmpdump.new({
       :stream => 'rtmp://test', :file => 'test.rec'
     })
@@ -19,7 +19,7 @@ describe 'Vidibus::Recording::Backend::Rtmpdump' do
 
   describe '#extract_metadata' do
     it 'should extract relevant metadata from RTMPDump v2.2' do
-      this.extract_metadata(success_v22).should eql({
+      subject.extract_metadata(success_v22).should eql({
         'presetname' => 'Custom',
         'creationdate' => 'Mon Jan 17 15:22:50 2011',
         'videodevice' => 'Osprey-210 Video Device 1',
@@ -40,7 +40,7 @@ describe 'Vidibus::Recording::Backend::Rtmpdump' do
     end
 
     it 'should extract relevant metadata from RTMPDump v2.3' do
-      this.extract_metadata(success_v23).should eql({
+      subject.extract_metadata(success_v23).should eql({
         'presetname' => 'Custom',
         'creationdate' => 'Mon Jan 17 15:22:50 2011',
         'videodevice' => 'Osprey-210 Video Device 1',
@@ -61,7 +61,7 @@ describe 'Vidibus::Recording::Backend::Rtmpdump' do
     end
 
     it 'should extract relevant metadata from RTMPDump v2.4' do
-      this.extract_metadata(success_v24).should eql({
+      subject.extract_metadata(success_v24).should eql({
         'audiocodecid' => '10.00',
         'audiodatarate' => '124.89',
         'audiosamplerate' => '48000.00',
@@ -87,24 +87,24 @@ describe 'Vidibus::Recording::Backend::Rtmpdump' do
   describe '#detect_error' do
     context 'on a successful request' do
       it 'should not raise an error with RTMPDump v2.2' do
-        expect { this.detect_error(success_v22) }.
+        expect { subject.detect_error(success_v22) }.
           not_to raise_error(Vidibus::Recording::Backend::RuntimeError)
       end
 
       it 'should not raise an error with RTMPDump v2.3' do
-        expect { this.detect_error(success_v23) }.
+        expect { subject.detect_error(success_v23) }.
           not_to raise_error(Vidibus::Recording::Backend::RuntimeError)
       end
 
       it 'should not raise an error with RTMPDump v2.4' do
-        expect { this.detect_error(success_v24) }.
+        expect { subject.detect_error(success_v24) }.
           not_to raise_error(Vidibus::Recording::Backend::RuntimeError)
       end
     end
 
     context 'on a request with invalid url' do
       it 'should raise an error with RTMPDump v2.4' do
-        expect { this.detect_error(error_v24) }.
+        expect { subject.detect_error(error_v24) }.
           to raise_error(Vidibus::Recording::Backend::RuntimeError, 'Problem accessing the DNS. (addr: whatever.domain)')
       end
     end

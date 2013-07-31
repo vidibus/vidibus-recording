@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 describe 'Vidibus::Recording::Mongoid' do
-  let(:this) do
+  let(:subject) do
     Recording.create({
       :name => 'Example Stream',
       :stream => 'rtmp://example.host'
@@ -9,7 +9,7 @@ describe 'Vidibus::Recording::Mongoid' do
   end
 
   let(:worker) do
-    Vidibus::Recording::Worker.new(this)
+    Vidibus::Recording::Worker.new(subject)
   end
 
   def cleanup(recording)
@@ -19,7 +19,7 @@ describe 'Vidibus::Recording::Mongoid' do
   end
 
   def stub_worker
-    stub(this).worker { worker }
+    stub(subject).worker { worker }
     stub(worker).record { true }
     stub(worker).fork do |block|
       block.call
@@ -33,7 +33,7 @@ describe 'Vidibus::Recording::Mongoid' do
   end
 
   describe 'validation' do
-    let(:this) do
+    let(:subject) do
       Recording.new({
         :name => 'Example Stream',
         :stream => 'rtmp://example.host',
@@ -42,99 +42,99 @@ describe 'Vidibus::Recording::Mongoid' do
     end
 
     it 'should pass with valid attributes' do
-      this.should be_valid
+      subject.should be_valid
     end
 
     it 'should fail without a stream' do
-      this.stream = nil
-      this.should be_invalid
+      subject.stream = nil
+      subject.should be_invalid
     end
 
     it 'should fail without a valid stream address' do
-      this.stream = 'something'
-      this.should be_invalid
+      subject.stream = 'something'
+      subject.should be_invalid
     end
 
     it 'should fail without a valid rtmp stream address' do
-      this.stream = 'rtmp://something'
-      this.should be_valid
+      subject.stream = 'rtmp://something'
+      subject.should be_valid
     end
 
     it 'should fail without a name' do
-      this.name = nil
-      this.should be_invalid
+      subject.name = nil
+      subject.should be_invalid
     end
   end
 
   describe '#worker' do
     it 'should return a worker instance' do
-      this.worker.should be_an_instance_of(Vidibus::Recording::Worker)
+      subject.worker.should be_an_instance_of(Vidibus::Recording::Worker)
     end
   end
 
   describe '#backend' do
     it 'should return a backend instance for given stream protocol' do
-      this.send(:setup_next_part)
-      this.backend.
+      subject.send(:setup_next_part)
+      subject.backend.
         should be_an_instance_of(Vidibus::Recording::Backend::Rtmpdump)
     end
   end
 
   describe '#start' do
     it 'should return false if stream is done' do
-      mock(this).done? { true }
-      this.start.should be_false
+      mock(subject).done? { true }
+      subject.start.should be_false
     end
 
     it 'should return false if stream has already been started' do
-      mock(this).started? { true }
-      this.start.should be_false
+      mock(subject).started? { true }
+      subject.start.should be_false
     end
 
     it 'should set #active to true' do
-      stub(this).start_worker
-      this.start
-      this.active.should be_true
+      stub(subject).start_worker
+      subject.start
+      subject.active.should be_true
     end
 
     context 'without params' do
       it 'should call #start_worker' do
-        mock(this).start_worker
-        this.start
+        mock(subject).start_worker
+        subject.start
       end
 
       it 'should persist the record with a bang' do
-        mock(this).save!
-        this.start
+        mock(subject).save!
+        subject.start
       end
 
       it 'should start a recording job' do
-        stub(this.worker).running?.times(2) { true }
-        this.start
-        this.worker_running?.should be_true
+        stub(subject.worker).running?.times(2) { true }
+        subject.start
+        subject.worker_running?.should be_true
       end
 
       it 'should set the process id' do
-        stub(this.worker).start
-        mock(this.worker).pid.any_number_of_times {123}
-        this.start
-        this.pid.should eq(123)
+        stub(subject.worker).start
+        mock(subject.worker).pid.any_number_of_times {123}
+        subject.start
+        subject.pid.should eq(123)
       end
 
       it 'should set the start time' do
         stub_time
-        this.start
-        this.started_at.should eq(Time.now)
+        subject.start
+        subject.started_at.should eq(Time.now)
       end
 
       it 'should set running to true' do
-        this.start
-        this.running.should be_true
+        subject.start
+        subject.running.should be_true
       end
 
       it 'should add first part of recording' do
-        this.start
-        this.parts.size.should eq(1)
+        subject.start
+        subject.parts.size.should eq(1)
       end
     end
 
@@ -142,7 +142,7 @@ describe 'Vidibus::Recording::Mongoid' do
       it 'should schedule a recording job' do
         stub_time('2011-01-12 00:00')
         run_at = 10.minutes.since
-        this.start(run_at)
+        subject.start(run_at)
         Delayed::Backend::Mongoid::Job.count.should eq(1)
         Delayed::Backend::Mongoid::Job.first.run_at.should eq(run_at)
       end
@@ -151,66 +151,66 @@ describe 'Vidibus::Recording::Mongoid' do
 
   describe '#resume' do
     it 'should return false unless stream has been started' do
-      mock(this).started? { false }
-      this.resume.should be_false
+      mock(subject).started? { false }
+      subject.resume.should be_false
     end
 
     it 'should return false if stream is running' do
-      mock(this).running? { true }
-      this.resume.should be_false
+      mock(subject).running? { true }
+      subject.resume.should be_false
     end
 
     context 'on a started recording' do
       before do
-        mock(this).started? { true }
+        mock(subject).started? { true }
       end
 
       it 'should set #active to true' do
-        stub(this).start_worker
-        this.resume
-        this.active.should be_true
+        stub(subject).start_worker
+        subject.resume
+        subject.active.should be_true
       end
 
       it 'should work even if stream has been stopped' do
-        stub(this).stopped? { true }
-        mock(this).start_worker
-        this.resume
+        stub(subject).stopped? { true }
+        mock(subject).start_worker
+        subject.resume
       end
 
       it 'should call #start_worker' do
-        mock(this).start_worker
-        this.resume
+        mock(subject).start_worker
+        subject.resume
       end
 
       it 'should persist the record with a bang' do
-        mock(this).save!
-        this.resume
+        mock(subject).save!
+        subject.resume
       end
 
       context 'and an existing part' do
         before do
-          this.send(:setup_next_part)
+          subject.send(:setup_next_part)
         end
 
         context 'without data' do
           before do
-            mock(this.current_part).has_data? { false }
+            mock(subject.current_part).has_data? { false }
           end
 
           it 'should re-use the first part' do
-            this.resume
-            this.parts.size.should eq(1)
+            subject.resume
+            subject.parts.size.should eq(1)
           end
         end
 
         context 'with data' do
           before do
-            mock(this.current_part).has_data? { true }
+            mock(subject.current_part).has_data? { true }
           end
 
           it 'should create the second part' do
-            this.resume
-            this.parts.size.should eq(2)
+            subject.resume
+            subject.parts.size.should eq(2)
           end
         end
       end
@@ -219,65 +219,65 @@ describe 'Vidibus::Recording::Mongoid' do
 
   describe '#restart' do
     it 'should call stop' do
-      mock(this).stop
-      this.restart
+      mock(subject).stop
+      subject.restart
     end
 
     it 'should call reset' do
-      mock(this).reset
-      this.restart
+      mock(subject).reset
+      subject.restart
     end
 
     it 'should call start' do
-      mock(this).start
-      this.restart
+      mock(subject).start
+      subject.restart
     end
   end
 
   describe '#stop' do
     it 'should return false unless recording has been started' do
-      this.stop.should be_false
+      subject.stop.should be_false
     end
 
     it 'should return false if recording is done' do
-      this.stopped_at = Time.now
-      this.stop.should be_false
+      subject.stopped_at = Time.now
+      subject.stop.should be_false
     end
 
     it 'should set #active to false' do
-      stub(this).start_worker
-      this.start
-      this.stop
-      this.active.should be_false
+      stub(subject).start_worker
+      subject.start
+      subject.stop
+      subject.active.should be_false
     end
 
     context 'with a running worker' do
-      before {this.start}
+      before {subject.start}
 
       it 'should reset the pid' do
-        this.stop
-        this.pid.should be_nil
+        subject.stop
+        subject.pid.should be_nil
       end
 
       it 'should set running to false' do
-        this.stop
-        this.running.should be_false
+        subject.stop
+        subject.running.should be_false
       end
 
       it 'should set the stop time' do
         stub_time
-        this.stop
-        this.stopped_at.should eq(Time.now)
+        subject.stop
+        subject.stopped_at.should eq(Time.now)
       end
 
       it 'should stop the recording worker' do
-        this.stop
-        this.worker_running?.should be_false
+        subject.stop
+        subject.worker_running?.should be_false
       end
 
       it 'should start postprocessing' do
-        mock(this).postprocess
-        this.stop
+        mock(subject).postprocess
+        subject.stop
       end
 
     end
@@ -285,90 +285,90 @@ describe 'Vidibus::Recording::Mongoid' do
 
   describe '#fail' do
     it 'should return false unless recording has been started' do
-      this.fail('wtf').should be_false
+      subject.fail('wtf').should be_false
     end
 
     it 'should return false if recording is done' do
-      this.stopped_at = Time.now
-      this.fail('wtf').should be_false
+      subject.stopped_at = Time.now
+      subject.fail('wtf').should be_false
     end
 
     it 'should set #active to false' do
-      this.start
-      this.fail('wtf')
-      this.active.should be_false
+      subject.start
+      subject.fail('wtf')
+      subject.active.should be_false
     end
 
     context 'with a running worker' do
       before do
         stub_worker
-        this.start
+        subject.start
       end
 
       it 'should reset the pid' do
-        this.fail('wtf')
-        this.pid.should be_nil
+        subject.fail('wtf')
+        subject.pid.should be_nil
       end
 
       it 'should set running to false' do
-        this.fail('wtf')
-        this.running.should be_false
+        subject.fail('wtf')
+        subject.running.should be_false
       end
 
       it 'should set the time of failure' do
         stub_time
-        this.fail('wtf')
-        this.failed_at.should eq(Time.now)
+        subject.fail('wtf')
+        subject.failed_at.should eq(Time.now)
       end
 
       it 'should stop the recording worker' do
-        this.fail('wtf')
-        this.worker_running?.should be_false
+        subject.fail('wtf')
+        subject.worker_running?.should be_false
       end
 
       it 'should set the error' do
-        this.fail('wtf')
-        this.error.should eq('wtf')
+        subject.fail('wtf')
+        subject.error.should eq('wtf')
       end
 
       it 'should start postprocessing' do
-        mock(this).postprocess
-        this.fail('wtf')
+        mock(subject).postprocess
+        subject.fail('wtf')
       end
     end
   end
 
   describe '#running?' do
     it 'should be false by default' do
-      this.running?.should be_false
+      subject.running?.should be_false
     end
   end
 
   describe '#worker_running?' do
     context 'without a running worker' do
       it 'should return false' do
-        this.worker_running?.should be_false
+        subject.worker_running?.should be_false
       end
     end
 
     context 'with a started worker' do
-      before {this.start}
+      before {subject.start}
 
       it 'should call job#running?' do
-        mock(this.worker).running? { true }
-        this.worker_running?
+        mock(subject.worker).running? { true }
+        subject.worker_running?
       end
 
       it 'should return true' do
-        stub(this.worker).running? { true }
-        this.worker_running?.should be_true
+        stub(subject.worker).running? { true }
+        subject.worker_running?.should be_true
       end
 
       context 'that has been stopped already' do
-        before {this.worker.stop}
+        before {subject.worker.stop}
 
         it 'should return false' do
-          this.worker_running?.should be_false
+          subject.worker_running?.should be_false
         end
       end
     end
@@ -380,15 +380,15 @@ describe 'Vidibus::Recording::Mongoid' do
     end
 
     it 'should find all active recordings' do
-      this.start
-      Recording.active.to_a.should eq([this])
+      subject.start
+      Recording.active.to_a.should eq([subject])
     end
 
     it 'should not find recordings that are not active' do
-      this
+      subject
       Recording.active.to_a.should eq([])
     end
   end
 
-  after {cleanup(this)}
+  after {cleanup(subject)}
 end

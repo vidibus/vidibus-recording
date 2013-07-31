@@ -1,13 +1,13 @@
 require 'spec_helper'
 
 describe Vidibus::Recording do
-  let(:this) { Vidibus::Recording }
+  let(:subject) { Vidibus::Recording }
 
   def stub_loop(sleep = false)
     if sleep == false
-      stub(this).sleep
+      stub(subject).sleep
     end
-    stub(this).loop do |block|
+    stub(subject).loop do |block|
       block.call
     end
   end
@@ -21,41 +21,41 @@ describe Vidibus::Recording do
     end
 
     it 'should call #autoload' do
-      stub(this).run
-      mock(this).autoload { [] }
-      this.monitor
+      stub(subject).run
+      mock(subject).autoload { [] }
+      subject.monitor
     end
 
     it 'should not run without recording classes' do
-      dont_allow(this).run
-      this.monitor
+      dont_allow(subject).run
+      subject.monitor
     end
 
     context 'with recording classes available' do
       before do
-        this.autoload_paths = ['app/models/*.rb']
+        subject.autoload_paths = ['app/models/*.rb']
       end
 
       it 'should call #run' do
-        mock(this).run
-        this.monitor
+        mock(subject).run
+        subject.monitor
       end
 
       it 'should loop endlessly' do
-        mock(this).loop
-        this.monitor
+        mock(subject).loop
+        subject.monitor
       end
 
       it 'should sleep after each iteration' do
         stub_loop(true)
-        mock(this).sleep(Vidibus::Recording.monitoring_interval)
-        this.monitor
+        mock(subject).sleep(Vidibus::Recording.monitoring_interval)
+        subject.monitor
       end
 
       it 'should do nothing without started recordings' do
         stub_loop
         dont_allow.any_instance_of(Recording).resume
-        this.monitor
+        subject.monitor
       end
 
       context 'with started recordings' do
@@ -69,8 +69,8 @@ describe Vidibus::Recording do
           stub.any_instance_of(Recording).worker_running? do
             raise 'That went wrong'
           end
-          mock(this.logger).error.with_any_args
-          expect { this.monitor }.not_to raise_error
+          mock(subject.logger).error.with_any_args
+          expect { subject.monitor }.not_to raise_error
         end
 
         context 'with a running worker' do
@@ -81,13 +81,13 @@ describe Vidibus::Recording do
           it 'should track progress' do
             stub_loop
             mock.any_instance_of(Recording).track_progress
-            this.monitor
+            subject.monitor
           end
 
           it 'should not resume' do
             stub_loop
             dont_allow.any_instance_of(Recording).resume
-            this.monitor
+            subject.monitor
           end
         end
 
@@ -99,7 +99,7 @@ describe Vidibus::Recording do
           it 'should resume' do
             stub_loop
             mock.any_instance_of(Recording).resume
-            this.monitor
+            subject.monitor
           end
         end
       end
@@ -108,20 +108,20 @@ describe Vidibus::Recording do
 
   describe '.autoload' do
     it 'should do nothing unless autoload paths have been defined' do
-      this.autoload_paths = []
+      subject.autoload_paths = []
       dont_allow(Dir)[]
-      this.autoload
+      subject.autoload
     end
 
     it 'should return all recording classes in autoload paths' do
-      this.autoload_paths = ['app/models/*.rb']
-      this.autoload.should eq([Recording])
+      subject.autoload_paths = ['app/models/*.rb']
+      subject.autoload.should eq([Recording])
     end
 
     it 'should set classes variable' do
-      this.autoload_paths = ['app/models/*.rb']
-      this.autoload
-      this.classes.should eq([Recording])
+      subject.autoload_paths = ['app/models/*.rb']
+      subject.autoload
+      subject.classes.should eq([Recording])
     end
   end
 end
