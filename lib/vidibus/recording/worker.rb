@@ -34,8 +34,7 @@ module Vidibus::Recording
           Timeout::timeout(STOP_TIMEOUT) do
             begin
               log("Stopping process #{pid}...")
-              # Use SIGQUIT to terminate because DelayedJob traps INT and TERM
-              Process.kill('SIGQUIT', pid)
+              Process.kill('SIGTERM', pid)
               Process.wait(pid)
               log('STOPPED')
             rescue Errno::ECHILD
