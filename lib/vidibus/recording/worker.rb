@@ -5,7 +5,7 @@ module Vidibus::Recording
   class Worker
     class ProcessError < StandardError; end
 
-    # START_TIMEOUT = 20
+    START_TIMEOUT = 20
     STOP_TIMEOUT = 10
 
     attr_accessor :recording, :pid, :metadata
@@ -74,8 +74,8 @@ module Vidibus::Recording
     def record
       cmd = recording.backend.command
       log("START: #{recording.stream}", true)
+      timeout = Time.now + START_TIMEOUT
       Open3::popen3(cmd) do |stdin, stdout, stderr|
-        maxloops = 10
         loop do
           begin
             string = stdout.read_nonblock(1024).force_encoding('UTF-8')
@@ -91,12 +91,11 @@ module Vidibus::Recording
             fail(e.message) && break
           end
           unless metadata
-            maxloops -= 1
-            if maxloops == 0
-              halt('No Metadata has been received so far.') && break
+            if Time.now > timeout
+              halt('No Metadata has been received so far, exiting.') && break
             end
           end
-          sleep 2
+          sleep(2)
         end
       end
     end
