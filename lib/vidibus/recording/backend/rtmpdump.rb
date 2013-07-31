@@ -79,7 +79,7 @@ module Vidibus::Recording::Backend
       end
     end
 
-    # Extract metadata from stdout or stderr.
+    # Detect error from stdout or stderr.
     # Output delivered by rtmpdump looks like this:
     #
     # RTMPDump v2.4
@@ -88,8 +88,12 @@ module Vidibus::Recording::Backend
     # ERROR: Problem accessing the DNS. (addr: whatever.domain)
     #
     def detect_error(string)
-      if string.match(/(?:ERROR\:\ (.+))/)
-        raise RuntimeError.new($1)
+      if error = string[/(?:ERROR\:\ (.+))/,1]
+        case error
+          when 'rtmp server sent error'
+        else
+          raise RuntimeError.new($1)
+        end
       end
     end
   end

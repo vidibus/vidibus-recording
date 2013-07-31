@@ -15,6 +15,7 @@ describe 'Vidibus::Recording::Backend::Rtmpdump' do
   let(:success_v22) { read_log('success_v22') }
   let(:success_v23) { read_log('success_v23') }
   let(:success_v24) { read_log('success_v24') }
+  let(:error_v24) { read_log('error_v24') }
 
   describe '#extract_metadata' do
     it 'should extract relevant metadata from RTMPDump v2.2' do
@@ -80,6 +81,32 @@ describe 'Vidibus::Recording::Backend::Rtmpdump' do
         'videodatarate' => '976.57',
         'width' => '620.00'
       })
+    end
+  end
+
+  describe '#detect_error' do
+    context 'on a successful request' do
+      it 'should not raise an error with RTMPDump v2.2' do
+        expect { this.detect_error(success_v22) }.
+          not_to raise_error(Vidibus::Recording::Backend::RuntimeError)
+      end
+
+      it 'should not raise an error with RTMPDump v2.3' do
+        expect { this.detect_error(success_v23) }.
+          not_to raise_error(Vidibus::Recording::Backend::RuntimeError)
+      end
+
+      it 'should not raise an error with RTMPDump v2.4' do
+        expect { this.detect_error(success_v24) }.
+          not_to raise_error(Vidibus::Recording::Backend::RuntimeError)
+      end
+    end
+
+    context 'on a request with invalid url' do
+      it 'should raise an error with RTMPDump v2.4' do
+        expect { this.detect_error(error_v24) }.
+          to raise_error(Vidibus::Recording::Backend::RuntimeError, 'Problem accessing the DNS. (addr: whatever.domain)')
+      end
     end
   end
 end
