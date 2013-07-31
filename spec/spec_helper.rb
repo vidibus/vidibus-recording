@@ -3,12 +3,12 @@ require 'simplecov'
 
 $:.unshift File.expand_path('../../', __FILE__)
 
-require "rspec"
-require "rr"
-require "mongoid"
+require 'rspec'
+require 'rr'
+require 'mongoid'
 
-require "vidibus-recording"
-require "app/models/recording"
+require 'vidibus-recording'
+require 'app/models/recording'
 
 Dir[File.expand_path('spec/support/**/*.rb')].each { |f| require f }
 
@@ -16,8 +16,8 @@ Dir[File.expand_path('spec/support/**/*.rb')].each { |f| require f }
 Vidibus::Recording.logger = Logger.new('/dev/null')
 
 Mongoid.configure do |config|
-  name = "vidibus-recording_test"
-  host = "localhost"
+  name = 'vidibus-recording_test'
+  host = 'localhost'
   config.master = Mongo::Connection.new.db(name)
   config.logger = nil
 end
