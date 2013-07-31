@@ -161,7 +161,7 @@ describe 'Vidibus::Recording::Mongoid' do
       this.resume.should be_false
     end
 
-    context 'with a started job' do
+    context 'on a started recording' do
       before do
         mock(this).started? { true }
       end
