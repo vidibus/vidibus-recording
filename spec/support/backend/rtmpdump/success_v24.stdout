@@ -1,0 +1,34 @@
+RTMPDump v2.4
+(c) 2010 Andrej Stepanchuk, Howard Chu, The Flvstreamer Team; license: GPL
+Connecting ...
+INFO: Connected...
+
+Starting Live Stream
+
+INFO: Metadata:
+INFO:   duration              0.00
+INFO:   width                 620.00
+INFO:   height                350.00
+INFO:   videodatarate         976.57
+INFO:   framerate             25.00
+INFO:   videocodecid          7.00
+INFO:   audiodatarate         124.89
+INFO:   audiosamplerate       48000.00
+INFO:   audiosamplesize       16.00
+INFO:   stereo                TRUE
+INFO:   audiocodecid          10.00
+INFO:   major_brand           mp42
+INFO:   minor_version         0
+INFO:   compatible_brands     mp42isomavc1
+INFO:   creation_time         2013-02-26 13:47:56
+INFO:   comment               www.dvdvideosoft.com
+INFO:   date                  2013
+INFO:   encoder               Lavf53.8.0
+INFO:   filesize              0.00
+0.520 kB / 0.00 sec
+120.398 kB / 4.46 sec
+372.649 kB / 8.32 sec
+385.018 kB / 8.47 sec
+409.783 kB / 8.79 sec
+422.846 kB / 8.96 sec
+448.226 kB / 9.28 sec
