@@ -1,6 +1,4 @@
 source :rubygems
 
-# Specify your gem's dependencies in vidibus-rtmpdump.gemspec
+# Specify your gem's dependencies in vidibus-recording.gemspec
 gemspec
-
-# gem 'delayed_job', '3.0.3'
