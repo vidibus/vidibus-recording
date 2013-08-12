@@ -283,10 +283,9 @@ module Vidibus::Recording
       remove_files
     end
 
-    # DEPRECATED: this is kept for existing records only.
     def remove_files
-      [file, log_file, yml_file].each do |f|
-        File.delete(f) if File.exists?(f)
+      Dir["#{basename}*"].each do |f|
+        File.delete(f)
       end
     end
   end
