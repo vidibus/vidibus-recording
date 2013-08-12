@@ -62,7 +62,6 @@ module Vidibus::Recording
       process_yml_file
       track_progress
       self.stopped_at = Time.now
-      # save!
     end
 
     def start
