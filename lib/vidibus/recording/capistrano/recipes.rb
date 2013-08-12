@@ -17,22 +17,18 @@ Capistrano::Configuration.instance.load do
         fetch(:rails_env, false) ? "RAILS_ENV=#{fetch(:rails_env)}" : ''
       end
 
-      def roles
-        fetch(:app)
-      end
-
       desc 'Stop the recording process'
-      task :stop, :roles => lambda { roles } do
+      task :stop, :roles => :app do
         run "cd #{current_path};#{rails_env} script/recording stop"
       end
 
       desc 'Start the recording process'
-      task :start, :roles => lambda { roles } do
+      task :start, :roles => :app do
         run "cd #{current_path};#{rails_env} script/recording start"
       end
 
       desc 'Restart the recording process'
-      task :restart, :roles => lambda { roles } do
+      task :restart, :roles => :app do
         run "cd #{current_path};#{rails_env} script/recording restart"
       end
     end
