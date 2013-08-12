@@ -71,7 +71,7 @@ module Vidibus::Recording
     # Stops the recording worker and starts postprocessing.
     def stop
       return false if done? || !started?
-      worker.stop
+      stop_worker
       self.pid = nil
       self.stopped_at = Time.now
       self.running = false
@@ -82,7 +82,7 @@ module Vidibus::Recording
     # Gets called from recording worker if it receives no more data.
     def halt(msg = nil)
       return false unless running?
-      worker.stop
+      stop_worker
       self.pid = nil
       self.running = false
       postprocess
@@ -92,7 +92,7 @@ module Vidibus::Recording
     # The worker gets stopped and postprocessing is started.
     def fail(msg)
       return false unless running?
-      worker.stop
+      stop_worker
       self.pid = nil
       self.error = msg
       self.failed_at = Time.now
@@ -230,6 +230,10 @@ module Vidibus::Recording
       self.pid = worker.pid
     end
 
+    def stop_worker
+      worker.stop
+    end
+
     def setup_next_part
       number = nil
       if current_part
@@ -275,7 +279,7 @@ module Vidibus::Recording
     end
 
     def cleanup
-      worker.stop
+      stop_worker
       remove_files
     end
 
