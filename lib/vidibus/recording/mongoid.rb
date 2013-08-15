@@ -44,8 +44,7 @@ module Vidibus::Recording
       if time == :now
         self.started_at = Time.now
         self.active = true
-        start_worker
-        save!
+        start!
       else
         schedule(time)
       end
@@ -57,8 +56,7 @@ module Vidibus::Recording
       self.stopped_at = nil
       self.failed_at = nil
       self.active = true
-      start_worker
-      save!
+      start!
     end
 
     # Resets data and starts anew.
@@ -228,6 +226,11 @@ module Vidibus::Recording
       worker.start
       self.running = true
       self.pid = worker.pid
+    end
+
+    def start!
+      start_worker
+      save!
     end
 
     def stop_worker
