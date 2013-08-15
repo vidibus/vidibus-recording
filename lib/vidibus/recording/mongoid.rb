@@ -224,8 +224,6 @@ module Vidibus::Recording
       return if worker_running?
       setup_next_part
       worker.start
-      self.running = true
-      self.pid = worker.pid
     end
 
     def ensure_pid
@@ -239,6 +237,8 @@ module Vidibus::Recording
 
     def start!
       start_worker
+      self.running = true
+      self.pid = worker.pid
       save!
       ensure_pid
     end

@@ -93,6 +93,7 @@ describe 'Vidibus::Recording::Mongoid' do
 
     it 'should set #active to true' do
       stub(subject).start_worker
+      stub(subject).ensure_pid
       subject.start
       subject.active.should be_true
     end
@@ -173,6 +174,7 @@ describe 'Vidibus::Recording::Mongoid' do
 
       it 'should set #active to true' do
         stub(subject).start_worker
+        stub(subject).ensure_pid
         subject.resume
         subject.active.should be_true
       end
