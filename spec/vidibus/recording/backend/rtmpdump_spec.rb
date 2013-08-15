@@ -88,24 +88,24 @@ describe 'Vidibus::Recording::Backend::Rtmpdump' do
     context 'on a successful request' do
       it 'should not raise an error with RTMPDump v2.2' do
         expect { subject.detect_error(success_v22) }.
-          not_to raise_error(Vidibus::Recording::Backend::RuntimeError)
+          not_to raise_error()
       end
 
       it 'should not raise an error with RTMPDump v2.3' do
         expect { subject.detect_error(success_v23) }.
-          not_to raise_error(Vidibus::Recording::Backend::RuntimeError)
+          not_to raise_error()
       end
 
       it 'should not raise an error with RTMPDump v2.4' do
         expect { subject.detect_error(success_v24) }.
-          not_to raise_error(Vidibus::Recording::Backend::RuntimeError)
+          not_to raise_error()
       end
     end
 
     context 'on a request with invalid url' do
       it 'should raise an error with RTMPDump v2.4' do
         expect { subject.detect_error(error_v24) }.
-          to raise_error(Vidibus::Recording::Backend::RuntimeError, 'Problem accessing the DNS. (addr: whatever.domain)')
+          to raise_error('Problem accessing the DNS. (addr: whatever.domain)')
       end
     end
   end
