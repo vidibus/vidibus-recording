@@ -228,9 +228,19 @@ module Vidibus::Recording
       self.pid = worker.pid
     end
 
+    def ensure_pid
+      unless worker.pid
+        fail('Worker did not return a PID!') and return
+      end
+      unless self.reload.pid == worker.pid
+        fail('Worker PID could not be stored!') and return
+      end
+    end
+
     def start!
       start_worker
       save!
+      ensure_pid
     end
 
     def stop_worker

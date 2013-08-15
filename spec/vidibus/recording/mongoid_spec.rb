@@ -98,6 +98,10 @@ describe 'Vidibus::Recording::Mongoid' do
     end
 
     context 'without params' do
+      before do
+        stub(subject).ensure_pid
+      end
+
       it 'should call #start_worker' do
         mock(subject).start_worker
         subject.start
@@ -105,6 +109,7 @@ describe 'Vidibus::Recording::Mongoid' do
 
       it 'should persist the record with a bang' do
         mock(subject).save!
+        stub(subject).reload { subject }
         subject.start
       end
 
@@ -115,6 +120,7 @@ describe 'Vidibus::Recording::Mongoid' do
       end
 
       it 'should set the process id' do
+        stub(subject.worker).running?.any_number_of_times { false }
         stub(subject.worker).start
         mock(subject.worker).pid.any_number_of_times {99999}
         subject.start
@@ -184,6 +190,7 @@ describe 'Vidibus::Recording::Mongoid' do
 
       it 'should persist the record with a bang' do
         mock(subject).save!
+        stub(subject).reload { subject }
         subject.resume
       end
 
@@ -252,7 +259,10 @@ describe 'Vidibus::Recording::Mongoid' do
     end
 
     context 'with a running worker' do
-      before {subject.start}
+      before do
+        stub(subject).start!
+        subject.start
+      end
 
       it 'should reset the pid' do
         subject.stop
