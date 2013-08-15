@@ -21,15 +21,6 @@ describe Vidibus::Recording::Worker do
     stub(Process).detach(pid)
   end
 
-  def process_alive?(pid)
-    begin
-      Process.kill(0, pid)
-      return true
-    rescue Errno::ESRCH
-      return false
-    end
-  end
-
   describe '#start' do
     it 'should fork and detach a separate process' do
       mock(subject).fork {999999}
@@ -54,10 +45,19 @@ describe Vidibus::Recording::Worker do
       subject.start
     end
 
-    it 'should kill the process' do
+    it 'should terminate the process' do
       pid = subject.pid
+      mock(Process).kill('SIGTERM', pid)
       subject.stop
-      process_alive?(pid).should be_false
+    end
+
+    it 'should kill the process after timeout' do
+      pid = subject.pid
+      stub(Timeout)::timeout(Vidibus::Recording::Worker::STOP_TIMEOUT) do
+        raise Timeout::Error
+      end
+      mock(Process).kill('KILL', pid)
+      subject.stop
     end
   end
 end
