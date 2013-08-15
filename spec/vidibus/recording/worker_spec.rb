@@ -13,7 +13,7 @@ describe Vidibus::Recording::Worker do
   end
 
   def stub_fork
-    pid = 123
+    pid = 999999
     stub(subject).fork do |block|
       block.call
       pid
@@ -32,8 +32,8 @@ describe Vidibus::Recording::Worker do
 
   describe '#start' do
     it 'should fork and detach a separate process' do
-      mock(subject).fork {123}
-      mock(Process).detach(123)
+      mock(subject).fork {999999}
+      mock(Process).detach(999999)
       subject.start
     end
 

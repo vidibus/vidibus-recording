@@ -23,7 +23,7 @@ describe 'Vidibus::Recording::Mongoid' do
     stub(worker).record { true }
     stub(worker).fork do |block|
       block.call
-      123
+      99999
     end
     stub(Process).detach.with_any_args
   end
@@ -118,7 +118,7 @@ describe 'Vidibus::Recording::Mongoid' do
         stub(subject.worker).start
         mock(subject.worker).pid.any_number_of_times {123}
         subject.start
-        subject.pid.should eq(123)
+        subject.pid.should eq(99999)
       end
 
       it 'should set the start time' do
