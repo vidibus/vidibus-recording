@@ -116,7 +116,7 @@ describe 'Vidibus::Recording::Mongoid' do
 
       it 'should set the process id' do
         stub(subject.worker).start
-        mock(subject.worker).pid.any_number_of_times {123}
+        mock(subject.worker).pid.any_number_of_times {99999}
         subject.start
         subject.pid.should eq(99999)
       end
