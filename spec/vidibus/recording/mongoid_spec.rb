@@ -322,8 +322,8 @@ describe 'Vidibus::Recording::Mongoid' do
       end
 
       it 'should stop the recording worker' do
+        mock(subject).stop_worker
         subject.fail('wtf')
-        subject.worker_running?.should be_false
       end
 
       it 'should set the error' do
@@ -368,6 +368,9 @@ describe 'Vidibus::Recording::Mongoid' do
         before {subject.worker.stop}
 
         it 'should return false' do
+          stub(Process).kill(0, subject.worker.pid) do
+            raise Errno::ESRCH
+          end
           subject.worker_running?.should be_false
         end
       end
