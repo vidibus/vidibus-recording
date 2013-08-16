@@ -165,7 +165,9 @@ module Vidibus::Recording
         end
         true
       else
-        update_attributes(:pid => nil, :running => false)
+        if running?
+          self.update_attributes!(:pid => nil, :running => false)
+        end
         false
       end
     end
