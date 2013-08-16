@@ -159,8 +159,10 @@ module Vidibus::Recording
     # Returns true if recording worker is still running.
     # Persists attributes accordingly.
     def worker_running?
-      if worker.running?
-        update_attributes(:running => true) unless running?
+      if fresh_worker.running?
+        unless running?
+          self.update_attributes!(:running => true)
+        end
         true
       else
         update_attributes(:pid => nil, :running => false)
@@ -223,7 +225,7 @@ module Vidibus::Recording
     def start_worker
       return if worker_running?
       setup_next_part
-      worker.start
+      fresh_worker.start
     end
 
     def ensure_pid
@@ -244,7 +246,12 @@ module Vidibus::Recording
     end
 
     def stop_worker
-      worker.stop
+      fresh_worker.stop
+    end
+
+    def fresh_worker
+      @worker = nil
+      worker
     end
 
     def setup_next_part
