@@ -13,6 +13,7 @@ Gem::Specification.new do |s|
   s.homepage    = 'https://github.com/vidibus/vidibus-recording'
   s.summary     = 'Video stream recording tools'
   s.description = 'Allows recording of RTMP video streams. Uses RTMPdump.'
+  s.license     = 'MIT'
 
   s.required_rubygems_version = '>= 1.3.6'
 
