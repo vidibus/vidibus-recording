@@ -61,6 +61,7 @@ describe Vidibus::Recording do
       context 'with started recordings' do
         before do
           stub(recording).start_worker
+          stub(recording).ensure_pid
           recording.start
         end
 
