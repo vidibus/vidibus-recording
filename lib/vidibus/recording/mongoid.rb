@@ -78,7 +78,7 @@ module Vidibus::Recording
     end
 
     # Gets called from recording worker if it receives no more data.
-    def halt(msg = nil)
+    def halt
       return false unless running?
       stop_worker
       self.pid = nil
