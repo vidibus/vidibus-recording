@@ -113,12 +113,33 @@ module Vidibus::Recording
 
     def fail(msg)
       log("ERROR: #{msg}", true)
-      recording.reload.fail(msg)
+      with_fresh_recording do |recording|
+        recording.fail(msg)
+        exit!
+      end
     end
 
     def halt(msg)
       log("HALT: #{msg}", true)
-      recording.reload.halt(msg)
+      with_fresh_recording do |recording|
+        recording.halt
+        exit!
+      end
+    end
+
+    def with_fresh_recording(&block)
+      rec = recording.reload # reload to get fresh object
+      if rec.pid == Process.pid
+        block.call(rec)
+      else
+        exit!
+      end
+    end
+
+    def exit!
+      self.pid = Process.pid
+      stop
+      exit
     end
 
     def extract_metadata(string)
