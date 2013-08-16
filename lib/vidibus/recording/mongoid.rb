@@ -69,34 +69,37 @@ module Vidibus::Recording
     # Stops the recording worker and starts postprocessing.
     def stop
       return false if done? || !started?
-      stop_worker
-      self.pid = nil
-      self.stopped_at = Time.now
-      self.running = false
-      self.active = false
-      postprocess
+      stop_worker do
+        self.pid = nil
+        self.stopped_at = Time.now
+        self.running = false
+        self.active = false
+        postprocess
+      end
     end
 
     # Gets called from recording worker if it receives no more data.
     def halt
       return false unless running?
-      stop_worker
-      self.pid = nil
-      self.running = false
-      postprocess
+      stop_worker do
+        self.pid = nil
+        self.running = false
+        postprocess
+      end
     end
 
     # Receives an error from recording worker and stores it.
     # The worker gets stopped and postprocessing is started.
     def fail(msg)
       return false unless running?
-      stop_worker
-      self.pid = nil
-      self.error = msg
-      self.failed_at = Time.now
-      self.running = false
-      self.active = false
-      postprocess
+      stop_worker do
+        self.pid = nil
+        self.error = msg
+        self.failed_at = Time.now
+        self.running = false
+        self.active = false
+        postprocess
+      end
     end
 
     # TODO: really a public method?
@@ -247,8 +250,18 @@ module Vidibus::Recording
       ensure_pid
     end
 
-    def stop_worker
-      fresh_worker.stop
+    # Stop worker and then call block.
+    # If this method is invoked (indirectly) by a running worker process
+    # the block is called before exiting the process.
+    def stop_worker(&block)
+      worker = fresh_worker
+      if worker.pid = Process.pid
+        block.call
+        worker.stop
+      else
+        worker.stop
+        block.call
+      end
     end
 
     def fresh_worker
