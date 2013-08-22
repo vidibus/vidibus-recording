@@ -255,7 +255,7 @@ module Vidibus::Recording
     # the block is called before exiting the process.
     def stop_worker(&block)
       worker = fresh_worker
-      if worker.pid = Process.pid
+      if worker.pid == Process.pid
         block.call
         worker.stop
       else
