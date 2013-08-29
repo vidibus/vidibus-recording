@@ -255,6 +255,7 @@ describe 'Vidibus::Recording::Mongoid' do
 
     it 'should set #active to false' do
       stub(subject).start_worker
+      stub(subject).ensure_pid { true }
       subject.start
       subject.stop
       subject.active.should be_false
