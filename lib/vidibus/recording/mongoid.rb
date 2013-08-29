@@ -97,7 +97,6 @@ module Vidibus::Recording
         self.error = msg
         self.failed_at = Time.now
         self.running = false
-        self.active = false
         postprocess
       end
     end

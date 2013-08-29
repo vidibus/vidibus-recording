@@ -306,10 +306,11 @@ describe 'Vidibus::Recording::Mongoid' do
       subject.fail('wtf').should be_false
     end
 
-    it 'should set #active to false' do
+    it 'should keep #active set to true' do
+      stub(subject).start_worker
       subject.start
-      subject.fail('wtf')
-      subject.active.should be_false
+      subject.stop
+      subject.active.should be_true
     end
 
     context 'with a running worker' do
