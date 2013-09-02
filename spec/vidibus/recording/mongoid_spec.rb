@@ -66,6 +66,12 @@ describe 'Vidibus::Recording::Mongoid' do
     end
   end
 
+  describe 'destroying' do
+    it 'should work' do
+      subject.destroy
+    end
+  end
+
   describe '#worker' do
     it 'should return a worker instance' do
       subject.worker.should be_an_instance_of(Vidibus::Recording::Worker)

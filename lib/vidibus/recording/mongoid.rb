@@ -255,11 +255,11 @@ module Vidibus::Recording
     def stop_worker(&block)
       worker = fresh_worker
       if worker.pid == Process.pid
-        block.call
+        block.call if block
         worker.stop
       else
         worker.stop
-        block.call
+        block.call if block
       end
     end
 
