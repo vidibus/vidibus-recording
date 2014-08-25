@@ -9,7 +9,7 @@ Bundler::GemHelper.install_tasks
 
 Rake::RDocTask.new do |rdoc|
   rdoc.rdoc_dir = 'rdoc'
-  rdoc.title = 'Vidibus::Encoder'
+  rdoc.title = 'Vidibus::Recording'
   rdoc.rdoc_files.include('README*')
   rdoc.rdoc_files.include('lib/**/*.rb')
   rdoc.options << '--charset=utf-8'
