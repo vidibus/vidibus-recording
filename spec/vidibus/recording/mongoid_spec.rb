@@ -209,7 +209,7 @@ describe 'Vidibus::Recording::Mongoid' do
 
         context 'without data' do
           before do
-            mock(subject.current_part).has_data? { false }
+            stub(subject.current_part).has_data? { false }
           end
 
           it 'should re-use the first part' do
@@ -220,7 +220,7 @@ describe 'Vidibus::Recording::Mongoid' do
 
         context 'with data' do
           before do
-            mock(subject.current_part).has_data? { true }
+            stub(subject.current_part).has_data? { true }
           end
 
           it 'should create the second part' do
@@ -315,7 +315,7 @@ describe 'Vidibus::Recording::Mongoid' do
     it 'should keep #active set to true' do
       stub(subject).start_worker
       subject.start
-      subject.stop
+      subject.fail('wtf')
       subject.active.should be_true
     end
 
