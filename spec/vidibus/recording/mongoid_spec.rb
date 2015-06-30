@@ -196,6 +196,11 @@ describe 'Vidibus::Recording::Mongoid' do
         subject.resume
       end
 
+      it 'should call #postprocess in case last recording process died' do
+        mock(subject).postprocess
+        subject.resume
+      end
+
       it 'should persist the record with a bang' do
         mock(subject).save!
         stub(subject).reload { subject }
@@ -226,6 +231,17 @@ describe 'Vidibus::Recording::Mongoid' do
           it 'should create the second part' do
             subject.resume
             subject.parts.size.should eq(2)
+          end
+
+          context 'that has been processed' do
+            before do
+              stub(subject.current_part).stopped? { true }
+            end
+
+            it 'should not process the part again' do
+              dont_allow(subject.current_part).postprocess
+              subject.resume
+            end
           end
         end
       end

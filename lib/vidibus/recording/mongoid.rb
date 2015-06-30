@@ -242,6 +242,7 @@ module Vidibus::Recording
     end
 
     def start!
+      postprocess
       start_worker
       self.running = true
       self.pid = worker.pid
@@ -290,10 +291,12 @@ module Vidibus::Recording
     end
 
     def postprocess
-      current_part.postprocess if current_part
-      set_size
-      set_duration
-      save!
+      if current_part && !current_part.stopped?
+        current_part.postprocess
+        set_size
+        set_duration
+        save!
+      end
     end
 
     def set_size
