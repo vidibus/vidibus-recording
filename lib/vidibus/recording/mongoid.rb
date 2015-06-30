@@ -68,7 +68,7 @@ module Vidibus::Recording
 
     # Stops the recording worker and starts postprocessing.
     def stop
-      return false if done? || !started?
+      return false unless running? || !done?
       stop_worker do
         self.pid = nil
         self.stopped_at = Time.now

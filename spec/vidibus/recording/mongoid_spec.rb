@@ -254,9 +254,20 @@ describe 'Vidibus::Recording::Mongoid' do
       subject.stop.should be_false
     end
 
-    it 'should return false if recording is done' do
-      subject.stopped_at = Time.now
-      subject.stop.should be_false
+    context 'on a recording that is done' do
+      before do
+        stub(subject).done? { true }
+      end
+
+      it 'should return false' do
+        subject.stop.should eq(false)
+      end
+
+      it 'should not return false if it is still running' do
+        stub(subject).running? { true }
+        mock(subject).stop_worker
+        subject.stop.should_not eq(false)
+      end
     end
 
     it 'should set #active to false' do
