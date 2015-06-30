@@ -270,9 +270,9 @@ describe 'Vidibus::Recording::Mongoid' do
       subject.stop.should be_false
     end
 
-    context 'on a recording that is done' do
+    context 'on a recording that has been stopped' do
       before do
-        stub(subject).done? { true }
+        stub(subject).stopped? { true }
       end
 
       it 'should return false' do
@@ -281,6 +281,17 @@ describe 'Vidibus::Recording::Mongoid' do
 
       it 'should not return false if it is still running' do
         stub(subject).running? { true }
+        mock(subject).stop_worker
+        subject.stop.should_not eq(false)
+      end
+    end
+
+    context 'on a recording that has failed' do
+      before do
+        stub(subject).failed? { true }
+      end
+
+      it 'should not return false' do
         mock(subject).stop_worker
         subject.stop.should_not eq(false)
       end
