@@ -20,7 +20,7 @@ Vidibus::Recording.logger = Logger.new('/dev/null')
 Mongoid.configure do |config|
   name = 'vidibus-recording_test'
   host = 'localhost'
-  config.master = Mongo::Connection.new.db(name)
+  config.connect_to(name)
   config.logger = nil
 end
 
@@ -28,6 +28,7 @@ RSpec.configure do |config|
   config.mock_with :rr
   config.before(:each) do
     stub(Process).kill.with_any_args
-    Mongoid.master.collections.select {|c| c.name !~ /system/}.each(&:drop)
+    # Mongoid.master.collections.select {|c| c.name !~ /system/}.each(&:drop)
+    Mongoid::Sessions.default.collections.select {|c| c.name !~ /system/}.each(&:drop)
   end
 end

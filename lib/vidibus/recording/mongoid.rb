@@ -27,7 +27,7 @@ module Vidibus::Recording
       field :active, :type => Boolean, :default => false
       field :running, :type => Boolean, :default => false
 
-      index :active
+      index({active: 1})
 
       validates :name, :presence => true
       validates :stream, :format => {:with => /^rtmp.*?:\/\/.+$/}

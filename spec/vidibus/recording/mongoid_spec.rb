@@ -89,19 +89,19 @@ describe 'Vidibus::Recording::Mongoid' do
   describe '#start' do
     it 'should return false if stream is done' do
       mock(subject).done? { true }
-      subject.start.should be_false
+      subject.start.should be_falsey
     end
 
     it 'should return false if stream has already been started' do
       mock(subject).started? { true }
-      subject.start.should be_false
+      subject.start.should be_falsey
     end
 
     it 'should set #active to true' do
       stub(subject).start_worker
       stub(subject).ensure_pid
       subject.start
-      subject.active.should be_true
+      subject.active.should be_truthy
     end
 
     context 'without params' do
@@ -123,7 +123,7 @@ describe 'Vidibus::Recording::Mongoid' do
       it 'should start a recording job' do
         stub(subject.worker).running?.times(2) { true }
         subject.start
-        subject.worker_running?.should be_true
+        subject.worker_running?.should be_truthy
       end
 
       it 'should set the process id' do
@@ -142,7 +142,7 @@ describe 'Vidibus::Recording::Mongoid' do
 
       it 'should set running to true' do
         subject.start
-        subject.running.should be_true
+        subject.running.should be_truthy
       end
 
       it 'should add first part of recording' do
@@ -165,12 +165,12 @@ describe 'Vidibus::Recording::Mongoid' do
   describe '#resume' do
     it 'should return false unless stream has been started' do
       mock(subject).started? { false }
-      subject.resume.should be_false
+      subject.resume.should be_falsey
     end
 
     it 'should return false if stream is running' do
       mock(subject).running? { true }
-      subject.resume.should be_false
+      subject.resume.should be_falsey
     end
 
     context 'on a started recording' do
@@ -182,7 +182,7 @@ describe 'Vidibus::Recording::Mongoid' do
         stub(subject).start_worker
         stub(subject).ensure_pid
         subject.resume
-        subject.active.should be_true
+        subject.active.should be_truthy
       end
 
       it 'should work even if stream has been stopped' do
@@ -267,7 +267,7 @@ describe 'Vidibus::Recording::Mongoid' do
 
   describe '#stop' do
     it 'should return false unless recording has been started' do
-      subject.stop.should be_false
+      subject.stop.should be_falsey
     end
 
     context 'on a recording that has been stopped' do
@@ -302,7 +302,7 @@ describe 'Vidibus::Recording::Mongoid' do
       stub(subject).ensure_pid { true }
       subject.start
       subject.stop
-      subject.active.should be_false
+      subject.active.should be_falsey
     end
 
     context 'with a running worker' do
@@ -318,7 +318,7 @@ describe 'Vidibus::Recording::Mongoid' do
 
       it 'should set running to false' do
         subject.stop
-        subject.running.should be_false
+        subject.running.should be_falsey
       end
 
       it 'should set the stop time' do
@@ -329,7 +329,7 @@ describe 'Vidibus::Recording::Mongoid' do
 
       it 'should stop the recording worker' do
         subject.stop
-        subject.worker_running?.should be_false
+        subject.worker_running?.should be_falsey
       end
 
       it 'should start postprocessing' do
@@ -342,19 +342,19 @@ describe 'Vidibus::Recording::Mongoid' do
 
   describe '#fail' do
     it 'should return false unless recording has been started' do
-      subject.fail('wtf').should be_false
+      subject.fail('wtf').should be_falsey
     end
 
     it 'should return false if recording is done' do
       subject.stopped_at = Time.now
-      subject.fail('wtf').should be_false
+      subject.fail('wtf').should be_falsey
     end
 
     it 'should keep #active set to true' do
       stub(subject).start_worker
       subject.start
       subject.fail('wtf')
-      subject.active.should be_true
+      subject.active.should be_truthy
     end
 
     context 'with a running worker' do
@@ -370,7 +370,7 @@ describe 'Vidibus::Recording::Mongoid' do
 
       it 'should set running to false' do
         subject.fail('wtf')
-        subject.running.should be_false
+        subject.running.should be_falsey
       end
 
       it 'should set the time of failure' do
@@ -398,14 +398,14 @@ describe 'Vidibus::Recording::Mongoid' do
 
   describe '#running?' do
     it 'should be false by default' do
-      subject.running?.should be_false
+      subject.running?.should be_falsey
     end
   end
 
   describe '#worker_running?' do
     context 'without a running worker' do
       it 'should return false' do
-        subject.worker_running?.should be_false
+        subject.worker_running?.should be_falsey
       end
     end
 
@@ -419,7 +419,7 @@ describe 'Vidibus::Recording::Mongoid' do
 
       it 'should return true' do
         stub(subject.worker).running? { true }
-        subject.worker_running?.should be_true
+        subject.worker_running?.should be_truthy
       end
 
       context 'that has been stopped already' do
@@ -429,7 +429,7 @@ describe 'Vidibus::Recording::Mongoid' do
           stub(Process).kill(0, subject.worker.pid) do
             raise Errno::ESRCH
           end
-          subject.worker_running?.should be_false
+          subject.worker_running?.should be_falsey
         end
       end
     end
