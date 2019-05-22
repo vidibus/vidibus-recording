@@ -13,28 +13,28 @@ module Vidibus::Recording
 
       embeds_many :parts, :as => :recording, :class_name => 'Vidibus::Recording::Part'
 
-      field :name
-      field :stream
-      field :pid, :type => Integer
-      field :info, :type => Hash
-      field :size, :type => Integer
-      field :duration, :type => Integer
-      field :error
-      field :scheduled_at, :type => DateTime
-      field :started_at, :type => DateTime
-      field :stopped_at, :type => DateTime
-      field :failed_at, :type => DateTime
-      field :active, :type => Boolean, :default => false
-      field :running, :type => Boolean, :default => false
+      field :name, type: String
+      field :stream, type: String
+      field :pid, type: Integer
+      field :info, type: Hash
+      field :size, type: Integer
+      field :duration, type: Integer
+      field :error, type: String
+      field :scheduled_at, type: DateTime
+      field :started_at, type: DateTime
+      field :stopped_at, type: DateTime
+      field :failed_at, type: DateTime
+      field :active, type: Boolean, default: false
+      field :running, type: Boolean, default: false
 
       index({active: 1})
 
-      validates :name, :presence => true
-      validates :stream, :format => {:with => /^rtmp.*?:\/\/.+$/}
+      validates :name, presence: true
+      validates :stream, format: {with: /\Artmp.*?:\/\/.+\z/}
 
       before_destroy :cleanup
 
-      scope :active, where(active: true)
+      scope :active, -> { where(active: true) }
     end
 
     # Starts a recording worker now, unless it has been done already.
