@@ -34,7 +34,7 @@ module Vidibus
       def run
         Dir.chdir(Rails.root)
         log = File.join(Rails.root, 'log', 'recording.log')
-        Vidibus::Recording.logger = ActiveSupport::BufferedLogger.new(log)
+        Vidibus::Recording.logger = ActiveSupport::Logger.new(log)
         Vidibus::Recording.monitor
       rescue => e
         Vidibus::Recording.logger.fatal(e)
