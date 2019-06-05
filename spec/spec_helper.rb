@@ -28,7 +28,6 @@ RSpec.configure do |config|
   config.mock_with :rr
   config.before(:each) do
     stub(Process).kill.with_any_args
-    # Mongoid.master.collections.select {|c| c.name !~ /system/}.each(&:drop)
-    Mongoid::Sessions.default.collections.select {|c| c.name !~ /system/}.each(&:drop)
+    Mongoid::Clients.default.collections.select {|c| c.name !~ /system/}.each(&:drop)
   end
 end

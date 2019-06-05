@@ -35,6 +35,8 @@ module Vidibus::Recording
       before_destroy :cleanup
 
       scope :active, -> { where(active: true) }
+      
+      attr_accessor :live
     end
 
     # Starts a recording worker now, unless it has been done already.
