@@ -1,7 +1,6 @@
 require 'mongoid'
 require 'vidibus-uuid'
 require 'active_support/core_ext'
-require 'delayed_job_mongoid'
 
 module Vidibus::Recording
   module Mongoid
@@ -289,7 +288,7 @@ module Vidibus::Recording
     end
 
     def schedule(time)
-      self.delay(:run_at => time).start
+      abort("Implement your background processing here to delay the start of the recording.\n For example:\n\ndef schedule(time)\n  self.delay(run_at: time).start\nend\n")
     end
 
     def postprocess

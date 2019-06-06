@@ -152,12 +152,10 @@ describe 'Vidibus::Recording::Mongoid' do
     end
 
     context 'with a given Time' do
-      it 'should schedule a recording job' do
+      it 'raises message' do
         stub_time('2011-01-12 00:00')
         run_at = 10.minutes.since
-        subject.start(run_at)
-        Delayed::Backend::Mongoid::Job.count.should eq(1)
-        Delayed::Backend::Mongoid::Job.first.run_at.should eq(run_at)
+        expect { subject.start(run_at) }.to raise_error
       end
     end
   end
