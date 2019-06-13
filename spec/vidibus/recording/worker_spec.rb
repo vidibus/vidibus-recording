@@ -47,7 +47,7 @@ describe Vidibus::Recording::Worker do
 
     it 'should terminate the process' do
       pid = subject.pid
-      mock(Process).kill('SIGTERM', pid)
+      mock(Process).kill('QUIT', pid)
       subject.stop
     end
 

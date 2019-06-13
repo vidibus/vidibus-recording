@@ -34,7 +34,8 @@ module Vidibus::Recording
           Timeout::timeout(STOP_TIMEOUT) do
             begin
               log("Stopping process #{pid}...")
-              Process.kill('SIGTERM', pid)
+              # Process.kill('SIGTERM', pid)
+              Process.kill('QUIT', pid)
               Process.wait(pid)
               log('STOPPED')
             rescue Errno::ECHILD
