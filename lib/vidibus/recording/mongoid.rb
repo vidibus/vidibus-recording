@@ -53,6 +53,7 @@ module Vidibus::Recording
 
     def start_recording!
       self.action = "start"
+      self.active = true
       save!
     end
 
@@ -63,6 +64,7 @@ module Vidibus::Recording
 
     def resume_recording!
       self.action = "resume"
+      self.active = true
       save!
     end
 
