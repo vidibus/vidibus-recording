@@ -45,14 +45,25 @@ module Vidibus
     def run
       loop do
         classes.each do |klass|
-          klass.active.each do |recording|
+          klass.for_recording.each do |recording|
             begin
-              if recording.worker_running?
+              if recording.start_recording?
+                logger.info("[#{Time.now.utc}] - Starting #{recording.class.name} #{recording.uuid} #{recording.name}")
+                recording.start
+              elsif recording.stop_recording?
+                logger.info("[#{Time.now.utc}] - Stopping #{recording.class.name} #{recording.uuid} #{recording.name}")
+                recording.stop
+              elsif recording.resume_recording?
+                logger.info("[#{Time.now.utc}] - Resuming #{recording.class.name} #{recording.uuid} #{recording.name}")
+                recording.stop
+                recording.start
+              elsif recording.worker_running?
                 recording.track_progress
               else
-                logger.info("[#{Time.now.utc}] - Resuming #{recording.class.name} #{recording.uuid}")
+                logger.info("[#{Time.now.utc}] - Resuming #{recording.class.name} #{recording.uuid} #{recording.name}")
                 recording.resume
               end
+              recording.standby!
             rescue => e
               logger.error("[#{Time.now.utc}] - ERROR:\n#{e.inspect}\n---\n#{e.backtrace.join("\n")}")
             end

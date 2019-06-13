@@ -10,7 +10,7 @@ module Vidibus::Recording
       include ::Mongoid::Timestamps
       include Vidibus::Uuid::Mongoid
 
-      embeds_many :parts, :as => :recording, :class_name => 'Vidibus::Recording::Part'
+      embeds_many :parts, as: :recording, class_name: 'Vidibus::Recording::Part'
 
       field :name, type: String
       field :stream, type: String
@@ -25,6 +25,7 @@ module Vidibus::Recording
       field :failed_at, type: DateTime
       field :active, type: Boolean, default: false
       field :running, type: Boolean, default: false
+      field :action, type: String, default: "standby"
 
       index({active: 1})
 
@@ -34,10 +35,42 @@ module Vidibus::Recording
       before_destroy :cleanup
 
       scope :active, -> { where(active: true) }
-      
+      scope :for_recording, -> { active }
       attr_accessor :live
     end
 
+    def start_recording?
+      action == "start"
+    end
+
+    def stop_recording?
+      action == "stop"
+    end
+
+    def resume_recording?
+      action == "resume"
+    end
+
+    def start_recording!
+      self.action = "start"
+      save!
+    end
+
+    def stop_recording!
+      self.action = "stop"
+      save!
+    end
+
+    def resume_recording!
+      self.action = "resume"
+      save!
+    end
+
+    def standby!
+      return true if action == "standby"
+      self.action = "standby"
+      save!
+    end
     # Starts a recording worker now, unless it has been done already.
     # Provide a Time object to schedule start.
     def start(time = :now)
@@ -164,12 +197,12 @@ module Vidibus::Recording
     def worker_running?
       if fresh_worker.running?
         unless running?
-          self.update_attributes!(:running => true)
+          self.update_attributes!(running: true)
         end
         true
       else
         if running?
-          self.update_attributes!(:pid => nil, :running => false)
+          self.update_attributes!(pid: nil, running: false)
         end
         false
       end
