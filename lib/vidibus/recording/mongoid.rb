@@ -108,6 +108,7 @@ module Vidibus::Recording
       stop_worker do
         self.pid = nil
         self.stopped_at = Time.now
+        self.failed_at = nil
         self.running = false
         self.active = false
         postprocess
