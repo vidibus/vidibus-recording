@@ -113,7 +113,7 @@ module Vidibus::Recording
     end
 
     def fail(msg)
-      log("ERROR: #{msg}", true)
+      log("FATAL: #{msg}", true)
       with_fresh_recording do |recording|
         recording.fail(msg)
         exit!
