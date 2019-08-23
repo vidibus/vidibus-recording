@@ -85,7 +85,7 @@ module Vidibus::Recording
               halt("No more data!") && break
             end
           rescue Backend::RtmpStreamError => e
-            fail([e.message, e.backtrace.join("\n")].join("\n")) && break
+            fail(e.message) && break
           end
           unless metadata
             if Time.now > timeout
