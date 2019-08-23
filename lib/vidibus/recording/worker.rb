@@ -1,5 +1,7 @@
-require 'open3'
-require 'timeout'
+# frozen_string_literal: true
+
+require "open3"
+require "timeout"
 
 module Vidibus::Recording
   class Worker
@@ -18,11 +20,9 @@ module Vidibus::Recording
 
     def start
       self.pid = fork do
-        begin
-          record
-        rescue => e
-          fail(e.inspect)
-        end
+        record
+      rescue => e
+        fail(e.message)
       end
       Process.detach(pid)
       pid
@@ -31,25 +31,22 @@ module Vidibus::Recording
     def stop
       if running?
         begin
-          Timeout::timeout(STOP_TIMEOUT) do
-            begin
-              log("Stopping process #{pid}...")
-              # Process.kill('SIGTERM', pid)
-              Process.kill('QUIT', pid)
-              Process.wait(pid)
-              log('STOPPED')
-            rescue Errno::ECHILD
-              log('STOPPED')
-            end
+          Timeout.timeout(STOP_TIMEOUT) do
+            log("Stopping process #{pid}...")
+            Process.kill("SIGTERM", pid)
+            Process.wait(pid)
+            log("STOPPED")
+          rescue Errno::ECHILD
+            log("STOPPED")
           end
         rescue Timeout::Error
           begin
             log("Killing process #{pid}")
-            Process.kill('KILL', pid)
+            Process.kill("KILL", pid)
             Process.wait(pid)
-            log('KILLED')
+            log("KILLED")
           rescue Errno::ECHILD
-            log('KILLED')
+            log("KILLED")
           end
         end
       end
@@ -75,24 +72,24 @@ module Vidibus::Recording
       cmd = recording.backend.command
       log("START: #{recording.stream}", true)
       timeout = Time.now + START_TIMEOUT
-      Open3::popen3(cmd) do |stdin, stdout, stderr|
+      Open3.popen3(cmd) do |stdin, stdout, stderr|
         loop do
           begin
-            string = stdout.read_nonblock(1024).force_encoding('UTF-8')
+            string = stdout.read_nonblock(1024).force_encoding("UTF-8")
             log(string)
             extract_metadata(string) unless metadata
             recording.backend.detect_error(string)
           rescue Errno::EAGAIN
           rescue EOFError
             if metadata
-              halt('No more data!') && break
+              halt("No more data!") && break
             end
-          rescue Backend::RuntimeError => e
-            fail(e.message) && break
+          rescue Backend::RtmpStreamError => e
+            fail([e.message, e.backtrace.join("\n")].join("\n")) && break
           end
           unless metadata
             if Time.now > timeout
-              halt('No Metadata has been received so far, exiting.') && break
+              halt("No Metadata has been received so far, exiting.") && break
             end
           end
           sleep(2)
@@ -102,7 +99,7 @@ module Vidibus::Recording
 
     def log(msg, print_header = false)
       if print_header
-        header = "--- #{Time.now.strftime('%F %R:%S %z')}"
+        header = "--- #{Time.now.strftime('%F %R:%S %z')}".dup
         header << " | Process #{Process.pid}"
         msg = "#{header}\n#{msg}\n"
       end
@@ -146,7 +143,7 @@ module Vidibus::Recording
     def extract_metadata(string)
       self.metadata = recording.backend.extract_metadata(string)
       if metadata
-        File.open(recording.current_part.yml_file, 'w') do |f|
+        File.open(recording.current_part.yml_file, "w") do |f|
           f.write(metadata.to_yaml)
         end
       end

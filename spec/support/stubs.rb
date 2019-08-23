@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Helper for stubbing time. Define String to be set as Time.now.
 #
 # Basic usage:
@@ -13,10 +15,10 @@ def stub_time(string = nil, &block)
   @now ||= Time.now
   string ||= Time.now.to_s(:db)
   now = Time.parse(string.to_s)
-  stub(Time).now {now}
+  stub(Time).now { now }
   if block_given?
     yield
-    stub(Time).now {@now}
+    stub(Time).now { @now }
   end
   now
 end

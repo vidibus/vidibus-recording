@@ -1,6 +1,8 @@
-require 'mongoid'
-require 'vidibus-uuid'
-require 'active_support/core_ext'
+# frozen_string_literal: true
+
+require "mongoid"
+require "vidibus-uuid"
+require "active_support/core_ext"
 
 module Vidibus::Recording
   module Mongoid
@@ -10,7 +12,7 @@ module Vidibus::Recording
       include ::Mongoid::Timestamps
       include Vidibus::Uuid::Mongoid
 
-      embeds_many :parts, as: :recording, class_name: 'Vidibus::Recording::Part'
+      embeds_many :parts, as: :recording, class_name: "Vidibus::Recording::Part"
 
       field :name, type: String
       field :stream, type: String
@@ -27,10 +29,10 @@ module Vidibus::Recording
       field :running, type: Boolean, default: false
       field :action, type: String, default: "standby"
 
-      index({active: 1})
+      index(active: 1)
 
       validates :name, presence: true
-      validates :stream, format: {with: /\Artmp.*?:\/\/.+\z/}
+      validates :stream, format: { with: /\Artmp.*?:\/\/.+\z/ }
 
       before_destroy :cleanup
 
@@ -151,7 +153,7 @@ module Vidibus::Recording
         :error,
         :size,
         :duration
-      ].map {|a| blank[a] = nil }
+      ].map { |a| blank[a] = nil }
       update_attributes!(blank)
       destroy_all_parts
     end
@@ -165,11 +167,11 @@ module Vidibus::Recording
     # TODO: really a public method?
     # Returns an instance of a fitting recording backend.
     def backend
-      @backend ||= Vidibus::Recording::Backend.load({
-        :stream => stream,
-        :file => current_part.data_file,
-        :live => true
-      })
+      @backend ||= Vidibus::Recording::Backend.load(
+        stream: stream,
+        file: current_part&.data_file,
+        live: true
+      )
     end
 
     # Returns true if recording has either been stopped or failed.
@@ -214,7 +216,7 @@ module Vidibus::Recording
     # Return folder to store recordings in.
     def folder
       @folder ||= begin
-        f = ['recordings']
+        f = ["recordings"]
         f.unshift(Rails.root) if defined?(Rails)
         path = File.join(f)
         FileUtils.mkdir_p(path) unless File.exist?(path)
@@ -260,7 +262,7 @@ module Vidibus::Recording
       parts.each do |part|
         part.destroy
       end
-      self.update_attributes!(:parts => [])
+      self.update_attributes!(parts: [])
     end
 
     def start_worker
@@ -271,10 +273,10 @@ module Vidibus::Recording
 
     def ensure_pid
       unless worker.pid
-        fail('Worker did not return a PID!') and return
+        fail("Worker did not return a PID!") && (return)
       end
       unless self.reload.pid == worker.pid
-        fail('Worker PID could not be stored!') and return
+        fail("Worker PID could not be stored!") && (return)
       end
     end
 
@@ -318,7 +320,7 @@ module Vidibus::Recording
         number = 1
       end
       if number
-        parts.build(:number => number)
+        parts.build(number: number)
       end
       current_part.start
     end

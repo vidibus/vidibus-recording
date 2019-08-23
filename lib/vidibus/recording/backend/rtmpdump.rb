@@ -1,16 +1,17 @@
+# frozen_string_literal: true
+
 module Vidibus::Recording::Backend
   class Rtmpdump
-
     PROTOCOLS = %[rtmp rtmpt rtmpe rtmpte rtmps rtmpts]
 
     attr_accessor :stream, :file, :live, :metadata
 
-    def self.executable=(path)
-      @executable = path
+    class << self
+      attr_writer :executable
     end
 
     def self.executable
-      @executable || 'rtmpdump'
+      @executable || "rtmpdump"
     end
 
     # Sets up a new dumper.
@@ -25,8 +26,8 @@ module Vidibus::Recording::Backend
       self.stream = attributes[:stream]
       self.file = attributes[:file]
       self.live = attributes[:live]
-      raise ConfigurationError.new('No output file defined') unless file
-      raise ConfigurationError.new('No input stream given') unless stream
+      raise ConfigurationError.new("No output file defined") unless file
+      raise ConfigurationError.new("No input stream given") unless stream
     end
 
     # Command for starting the recording.
@@ -72,7 +73,7 @@ module Vidibus::Recording::Backend
     #   audiodatarate         48.00
     #
     def extract_metadata(string)
-      prefix = /(?:INFO\:\ *)/ if string.match(/INFO\:/) # INFO: gets prepended since v2.3
+      prefix = /(?:INFO\:\ *)/ if string.match?(/INFO\:/) # INFO: gets prepended since v2.3
       if metadata = string.match(/#{prefix}Metadata\:\n(.+)\Z/m)
         tuples = $1.scan(/#{prefix}([^\n\ \d]+)\ +([^\ \n][^\n]+)\n/)
         self.metadata = Hash[tuples]
@@ -88,11 +89,11 @@ module Vidibus::Recording::Backend
     # ERROR: Problem accessing the DNS. (addr: whatever.domain)
     #
     def detect_error(string)
-      if error = string[/(?:ERROR\:\ (.+))/,1]
+      if error = string[/(?:ERROR\:\ (.+))/, 1]
         case error
-          when 'rtmp server sent error'
+        when "rtmp server sent error"
         else
-          raise RuntimeError.new($1)
+          raise RtmpStreamError.new($1)
         end
       end
     end

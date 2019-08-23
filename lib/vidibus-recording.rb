@@ -1,1 +1,3 @@
-require 'vidibus/recording'
+# frozen_string_literal: true
+
+require "vidibus/recording"

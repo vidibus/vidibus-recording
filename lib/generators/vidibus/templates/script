@@ -1,8 +1,9 @@
 #!/usr/bin/env ruby
+# frozen_string_literal: true
 
-require File.expand_path('../../config/environment', __FILE__)
-require 'vidibus/recording/daemon'
+require File.expand_path("../../config/environment", __FILE__)
+require "vidibus/recording/daemon"
 
 Vidibus::Recording.monitoring_interval = 1 # second
-Vidibus::Recording.autoload_paths << Rails.root.join('app/**/*.rb')
+Vidibus::Recording.autoload_paths << Rails.root.join("app/**/*.rb")
 Vidibus::Recording::Daemon.new(ARGV).daemonize

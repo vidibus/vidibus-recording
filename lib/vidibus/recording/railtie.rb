@@ -1,4 +1,6 @@
-require 'rails'
+# frozen_string_literal: true
+
+require "rails"
 
 module Vidibus
   module Recording

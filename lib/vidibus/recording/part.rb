@@ -1,6 +1,8 @@
-require 'yaml'
-require 'mongoid'
-require 'vidibus-uuid'
+# frozen_string_literal: true
+
+require "yaml"
+require "mongoid"
+require "vidibus-uuid"
 
 module Vidibus::Recording
   class Part
@@ -10,16 +12,16 @@ module Vidibus::Recording
 
     SIZE_THRESHOLD = 2000
 
-    embedded_in :recording, :polymorphic => true
+    embedded_in :recording, polymorphic: true
 
-    field :number, :type => Integer
-    field :info, :type => Hash
-    field :size, :type => Integer
-    field :duration, :type => Integer
-    field :started_at, :type => DateTime
-    field :stopped_at, :type => DateTime
+    field :number, type: Integer
+    field :info, type: Hash
+    field :size, type: Integer
+    field :duration, type: Integer
+    field :started_at, type: DateTime
+    field :stopped_at, type: DateTime
 
-    validates :number, :presence => true
+    validates :number, presence: true
 
     before_destroy :remove_files
 
@@ -49,7 +51,7 @@ module Vidibus::Recording
         :size,
         :duration,
         :started_at
-      ].map {|a| blanks[a] = nil }
+      ].map { |a| blanks[a] = nil }
       update_attributes(blanks)
     end
 
@@ -73,7 +75,7 @@ module Vidibus::Recording
 
     def process_yml_file
       if str = read_and_delete_file(yml_file)
-        if values = YAML::load(str)
+        if values = YAML.load(str)
           fix_value_classes!(values)
           self.info = values
         end
@@ -81,7 +83,7 @@ module Vidibus::Recording
     end
 
     def set_size
-      self.size = File.exists?(data_file) ? File.size(data_file) : 0
+      self.size = File.exist?(data_file) ? File.size(data_file) : 0
     end
 
     def set_duration
@@ -89,7 +91,7 @@ module Vidibus::Recording
     end
 
     def read_and_delete_file(file)
-      if File.exists?(file)
+      if File.exist?(file)
         str = File.read(file)
         File.delete(file)
         str
@@ -102,7 +104,7 @@ module Vidibus::Recording
 
     def remove_files
       [data_file, yml_file].each do |f|
-        File.delete(f) if File.exists?(f)
+        File.delete(f) if File.exist?(f)
       end
     end
   end

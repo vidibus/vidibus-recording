@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Capistrano Recipes for monitoring recordings.
 #
 # Load this file from your Capistrano config.rb:
@@ -14,21 +16,21 @@ Capistrano::Configuration.instance.load do
   namespace :vidibus do
     namespace :recording do
       def rails_env
-        fetch(:rails_env, false) ? "RAILS_ENV=#{fetch(:rails_env)}" : ''
+        fetch(:rails_env, false) ? "RAILS_ENV=#{fetch(:rails_env)}" : ""
       end
 
-      desc 'Stop the recording process'
-      task :stop, :roles => :app do
+      desc "Stop the recording process"
+      task :stop, roles: :app do
         run "cd #{current_path};#{rails_env} script/recording stop"
       end
 
-      desc 'Start the recording process'
-      task :start, :roles => :app do
+      desc "Start the recording process"
+      task :start, roles: :app do
         run "cd #{current_path};#{rails_env} script/recording start"
       end
 
-      desc 'Restart the recording process'
-      task :restart, :roles => :app do
+      desc "Restart the recording process"
+      task :restart, roles: :app do
         run "cd #{current_path};#{rails_env} script/recording restart"
       end
     end

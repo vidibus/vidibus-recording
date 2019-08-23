@@ -1,4 +1,6 @@
-require 'vidibus/recording/capistrano/recipes'
+# frozen_string_literal: true
+
+require "vidibus/recording/capistrano/recipes"
 
 # Run Capistrano Recipes for monitoring recordings.
 #
@@ -6,7 +8,7 @@ require 'vidibus/recording/capistrano/recipes'
 # require 'vidibus/recording/capistrano'
 #
 Capistrano::Configuration.instance.load do
-  after 'deploy:stop',    'vidibus:recording:stop'
-  after 'deploy:start',   'vidibus:recording:start'
-  after 'deploy:restart', 'vidibus:recording:restart'
+  after "deploy:stop",    "vidibus:recording:stop"
+  after "deploy:start",   "vidibus:recording:start"
+  after "deploy:restart", "vidibus:recording:restart"
 end
